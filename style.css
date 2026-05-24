@@ -1,0 +1,317 @@
+/* ============================================
+   《代码之下》自定义样式 & 动画 (教育平台风格)
+   ============================================ */
+
+/* ----- Hero animated glow orbs (soft green + amber) ----- */
+@keyframes float-slow {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  33%      { transform: translate(40px, -20px) scale(1.08); opacity: 0.7; }
+  66%      { transform: translate(-25px, 30px) scale(0.92); opacity: 0.35; }
+}
+@keyframes float-slow-reverse {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  33%      { transform: translate(-35px, 25px) scale(1.1); opacity: 0.7; }
+  66%      { transform: translate(30px, -30px) scale(0.9); opacity: 0.3; }
+}
+.orb-1 { animation: float-slow 14s ease-in-out infinite; }
+.orb-2 { animation: float-slow-reverse 16s ease-in-out infinite; }
+
+/* ----- Subtle grid pattern (light mode) ----- */
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(16, 185, 129, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* ----- Gradient text (emerald education style) ----- */
+.text-gradient-edu {
+  background: linear-gradient(135deg, #059669 0%, #10B981 40%, #F59E0B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Keep old gradient text class for backward compatibility with remaining dark sections */
+.text-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #38BDF8 50%, #818CF8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ----- Fade-up reveal (Intersection Observer) ----- */
+.fade-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.delay-100 { transition-delay: 100ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-400 { transition-delay: 400ms; }
+.delay-500 { transition-delay: 500ms; }
+
+/* ----- Bounce arrow ----- */
+@keyframes bounce-arrow {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50%      { transform: translateY(12px); opacity: 1; }
+}
+.bounce-arrow { animation: bounce-arrow 2s ease-in-out infinite; }
+
+/* ----- Bento card hover (education warm style) ----- */
+.bento-card {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.5s ease;
+}
+.bento-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 48px -12px rgba(16, 185, 129, 0.15),
+              0 8px 24px -8px rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+/* ----- Modal enter animation ----- */
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-enter { animation: modal-in 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* ----- Terminal cursor blink ----- */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+.cursor-blink { animation: blink 1s step-end infinite; }
+
+/* ----- Scenario transition ----- */
+.scenario-enter {
+  animation: modal-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ----- Hide scrollbar (case carousel) ----- */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ----- Quiz ring SVG ----- */
+.ring-bg  { stroke: rgba(16, 185, 129, 0.12); }
+.ring-fill {
+  stroke: #10B981;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================
+   DARK MODE — html.dark overrides
+   ============================================ */
+
+/* Body & base */
+html.dark body { background-color: #0F172A !important; color: #E2E8F0; }
+
+/* Hero background → dark gradient */
+html.dark #hero {
+  background-image: none !important;
+  background-color: #0B1120 !important;
+}
+html.dark .hero-grid {
+  background-image:
+    linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+html.dark .orb-1 { background-color: rgba(56, 189, 248, 0.12) !important; }
+html.dark .orb-2 { background-color: rgba(99, 102, 241, 0.10) !important; }
+
+/* Hero text → white */
+html.dark #hero h1,
+html.dark #hero h1 span[class*="text-slate"] { color: #F1F5F9 !important; }
+html.dark #hero p[class*="text-slate"] { color: #94A3B8 !important; }
+html.dark #hero span[class*="text-emerald"] { color: #6EE7B7 !important; }
+html.dark #hero span[class*="bg-emerald-50"] { background-color: rgba(16, 185, 129, 0.1) !important; }
+html.dark #hero span[class*="border-emerald-200"] { border-color: rgba(16, 185, 129, 0.2) !important; }
+html.dark .text-gradient-edu {
+  background: linear-gradient(135deg, #6EE7B7 0%, #38BDF8 40%, #FBBF24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Navbar → dark glass */
+html.dark nav { background-color: rgba(15, 23, 42, 0.85) !important; border-color: rgba(255, 255, 255, 0.06) !important; }
+html.dark nav span[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark nav a[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark nav a[class*="text-slate-500"]:hover { color: #6EE7B7 !important; background-color: rgba(16, 185, 129, 0.08) !important; }
+html.dark nav button[class*="border-slate-200"] { border-color: rgba(255, 255, 255, 0.1) !important; background-color: rgba(255, 255, 255, 0.04) !important; }
+html.dark nav button[class*="border-slate-200"]:hover { border-color: rgba(16, 185, 129, 0.3) !important; background-color: rgba(16, 185, 129, 0.08) !important; }
+html.dark #moonIcon { color: #94A3B8 !important; }
+
+/* Hero CTA secondary button */
+html.dark #hero a[class*="bg-white"] { background-color: rgba(255, 255, 255, 0.05) !important; border-color: rgba(255, 255, 255, 0.1) !important; color: #CBD5E1 !important; }
+html.dark #hero a[class*="bg-white"]:hover { border-color: rgba(16, 185, 129, 0.3) !important; color: #6EE7B7 !important; background-color: rgba(16, 185, 129, 0.08) !important; }
+
+/* Knowledge section */
+html.dark #knowledge { background-color: #0F172A !important; }
+html.dark #knowledge h2 { color: #F1F5F9 !important; }
+html.dark #knowledge p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #knowledge span[class*="bg-emerald-50"] { background-color: rgba(16, 185, 129, 0.1) !important; }
+html.dark #knowledge span[class*="border-emerald-200"] { border-color: rgba(16, 185, 129, 0.2) !important; }
+html.dark #knowledge span[class*="text-emerald-700"] { color: #6EE7B7 !important; }
+
+/* Knowledge cards → dark glass */
+html.dark .bento-card {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(16px);
+}
+html.dark .bento-card h3 { color: #F1F5F9 !important; }
+html.dark .bento-card p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark .bento-card div[class*="border-slate-100"],
+html.dark .bento-card [class*="border-t"] { border-color: rgba(255, 255, 255, 0.06) !important; }
+html.dark .bento-card div[class*="text-slate-400"] { color: #64748B !important; }
+html.dark .bento-card:hover {
+  border-color: rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 20px 60px -12px rgba(56, 189, 248, 0.15), 0 0 0 1px rgba(56, 189, 248, 0.1) inset !important;
+}
+/* Dark mode card icon circles */
+html.dark .bento-card div[class*="bg-emerald-50"] { background-color: rgba(16, 185, 129, 0.12) !important; border-color: rgba(16, 185, 129, 0.2) !important; }
+html.dark .bento-card div[class*="bg-sky-50"]    { background-color: rgba(14, 165, 233, 0.12) !important; border-color: rgba(14, 165, 233, 0.2) !important; }
+html.dark .bento-card div[class*="bg-amber-50"]   { background-color: rgba(245, 158, 11, 0.12) !important; border-color: rgba(245, 158, 11, 0.2) !important; }
+html.dark .bento-card div[class*="bg-violet-50"]  { background-color: rgba(139, 92, 246, 0.12) !important; border-color: rgba(139, 92, 246, 0.2) !important; }
+
+/* ----- Knowledge card smooth expand animation ----- */
+.edu-card-detail {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.edu-card-detail > div { overflow: hidden; }
+.group:hover .edu-card-detail {
+  grid-template-rows: 1fr;
+}
+
+/* ============================================
+   DARK MODE — Sections 3-5 + Footer + Modal
+   ============================================ */
+
+/* Cases section */
+html.dark #cases { background-color: #0B1120 !important; }
+html.dark #cases h2 { color: #F1F5F9 !important; }
+html.dark #cases p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #cases span[class*="bg-amber-50"] { background-color: rgba(245, 158, 11, 0.1) !important; border-color: rgba(245, 158, 11, 0.2) !important; }
+html.dark #cases span[class*="text-amber-700"] { color: #FBBF24 !important; }
+html.dark #cases div[class*="text-slate-400"] { color: #64748B !important; }
+
+/* Case carousel cards */
+html.dark #caseCarousel > div {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(16px);
+}
+html.dark #caseCarousel h3 { color: #F1F5F9 !important; }
+html.dark #caseCarousel p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #caseCarousel div[class*="bg-amber-50"] { background-color: rgba(245, 158, 11, 0.12) !important; border-color: rgba(245, 158, 11, 0.2) !important; }
+html.dark #caseCarousel span[class*="text-amber-600"] { color: #FBBF24 !important; }
+html.dark #caseCarousel span[class*="bg-amber-50"] { background-color: rgba(245, 158, 11, 0.1) !important; border-color: rgba(245, 158, 11, 0.15) !important; }
+html.dark #caseCarousel > div:hover { border-color: rgba(56, 189, 248, 0.3) !important; }
+
+/* Case Modal */
+html.dark #caseModalContent {
+  background-color: #1E293B !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html.dark #caseModalContent h2 { color: #F1F5F9 !important; }
+html.dark #caseModalContent h4[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #caseModalContent p[class*="text-slate-600"] { color: #94A3B8 !important; }
+html.dark #caseModalContent p[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark #caseModalContent div[class*="bg-slate-50"] { background-color: rgba(15, 23, 42, 0.5) !important; border-color: rgba(255, 255, 255, 0.05) !important; }
+html.dark #caseModalContent div[class*="bg-red-50"] { background-color: rgba(239, 68, 68, 0.08) !important; border-color: rgba(239, 68, 68, 0.15) !important; }
+html.dark #caseModalContent div[class*="bg-amber-50"] { background-color: rgba(245, 158, 11, 0.08) !important; border-color: rgba(245, 158, 11, 0.15) !important; }
+html.dark #caseModalContent div[class*="bg-emerald-50"] { background-color: rgba(16, 185, 129, 0.08) !important; border-color: rgba(16, 185, 129, 0.15) !important; }
+html.dark #caseModalContent button[class*="border-slate-200"] { border-color: rgba(255, 255, 255, 0.1) !important; color: #94A3B8 !important; }
+html.dark #caseModalContent button[class*="border-slate-200"]:hover { border-color: rgba(255, 255, 255, 0.2) !important; background-color: rgba(255, 255, 255, 0.05) !important; }
+
+/* Lab section */
+html.dark #lab { background-color: #0F172A !important; }
+html.dark #lab h2 { color: #F1F5F9 !important; }
+html.dark #lab p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #lab span[class*="bg-violet-50"] { background-color: rgba(139, 92, 246, 0.1) !important; border-color: rgba(139, 92, 246, 0.2) !important; }
+html.dark #lab span[class*="text-violet-700"] { color: #A78BFA !important; }
+html.dark #lab div[class*="border-slate-200"][class*="bg-white"] {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(16px);
+}
+html.dark #lab div[class*="bg-slate-100"] { background-color: rgba(15, 23, 42, 0.6) !important; border-color: rgba(255, 255, 255, 0.05) !important; }
+
+/* Lab content text */
+html.dark #labContent p[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark #labContent p[class*="text-slate-700"] { color: #CBD5E1 !important; }
+html.dark #labContent p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #labContent span[class*="text-slate-400"] { color: #64748B !important; }
+html.dark #labContent span[class*="text-violet-600"] { color: #A78BFA !important; }
+html.dark #labContent span[class*="bg-violet-50"] { background-color: rgba(139, 92, 246, 0.1) !important; border-color: rgba(139, 92, 246, 0.15) !important; }
+html.dark #labContent div[class*="text-violet-300"] { color: rgba(139, 92, 246, 0.4) !important; }
+html.dark #labContent button[class*="bg-slate-50"] { background-color: rgba(255, 255, 255, 0.04) !important; border-color: rgba(255, 255, 255, 0.08) !important; }
+html.dark #labContent button[class*="bg-slate-50"]:hover { border-color: rgba(139, 92, 246, 0.3) !important; background-color: rgba(139, 92, 246, 0.08) !important; }
+html.dark #labContent button[class*="bg-slate-50"] p[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark #labContent button[class*="bg-slate-50"] p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #labContent span[class*="bg-white"][class*="border-slate-200"] { background-color: rgba(255, 255, 255, 0.06) !important; border-color: rgba(255, 255, 255, 0.1) !important; color: #A78BFA !important; }
+html.dark #labContent span[class*="text-emerald-600"] { color: #34D399 !important; }
+html.dark #labContent span[class*="bg-emerald-50"] { background-color: rgba(16, 185, 129, 0.1) !important; border-color: rgba(16, 185, 129, 0.2) !important; }
+html.dark #labContent span[class*="text-red-500"] { color: #F87171 !important; }
+html.dark #labContent span[class*="bg-red-50"] { background-color: rgba(239, 68, 68, 0.1) !important; border-color: rgba(239, 68, 68, 0.15) !important; }
+html.dark #labContent button[class*="bg-white"] { background-color: rgba(255, 255, 255, 0.05) !important; border-color: rgba(255, 255, 255, 0.1) !important; color: #CBD5E1 !important; }
+html.dark #labContent button[class*="bg-white"]:hover { border-color: rgba(139, 92, 246, 0.3) !important; color: #A78BFA !important; }
+
+/* Quiz section */
+html.dark #quiz { background-color: #0B1120 !important; }
+html.dark #quiz h2 { color: #F1F5F9 !important; }
+html.dark #quiz p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #quiz span[class*="bg-sky-50"] { background-color: rgba(14, 165, 233, 0.1) !important; border-color: rgba(14, 165, 233, 0.2) !important; }
+html.dark #quiz span[class*="text-sky-700"] { color: #7DD3FC !important; }
+
+/* Quiz container */
+html.dark #quizContainer {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(16px);
+}
+html.dark #quizContainer h3 { color: #E2E8F0 !important; }
+html.dark #quizContainer p[class*="text-sky-500"] { color: #7DD3FC !important; }
+html.dark #quizContainer p[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark #quizContainer p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #quizContainer p[class*="text-slate-400"] { color: #64748B !important; }
+html.dark #quizContainer button[class*="bg-slate-50"] {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html.dark #quizContainer button[class*="bg-slate-50"]:hover {
+  border-color: rgba(14, 165, 233, 0.3) !important;
+  background-color: rgba(14, 165, 233, 0.08) !important;
+}
+html.dark #quizContainer span[class*="text-slate-600"] { color: #CBD5E1 !important; }
+html.dark #quizContainer span[class*="text-slate-400"] { color: #64748B !important; }
+html.dark #quizContainer span[class*="bg-white"] { background-color: rgba(255, 255, 255, 0.06) !important; border-color: rgba(255, 255, 255, 0.1) !important; }
+html.dark #quizProgress span[class*="bg-slate-200"] { background-color: rgba(255, 255, 255, 0.1) !important; }
+
+/* Footer */
+html.dark footer { background-color: #0F172A !important; border-color: rgba(255, 255, 255, 0.06) !important; }
+html.dark footer h3 { color: #F1F5F9 !important; }
+html.dark footer p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark footer p[class*="text-slate-400"] { color: #64748B !important; }
+html.dark footer p[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark footer span[class*="text-emerald-600"] { color: #6EE7B7 !important; }
+html.dark footer span[class*="text-slate-400"] { color: #64748B !important; }
+html.dark footer div[id="teamGrid"] > div {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+html.dark footer div[id="teamGrid"] > div:hover { border-color: rgba(16, 185, 129, 0.3) !important; }
+html.dark footer span[class*="bg-slate-100"] { background-color: rgba(255, 255, 255, 0.05) !important; border-color: rgba(255, 255, 255, 0.08) !important; color: #94A3B8 !important; }
