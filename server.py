@@ -378,8 +378,9 @@ def reset_session():
     return jsonify({'ok': True})
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
     print(f'\n  代码之下 — AI 后端服务')
     print(f'  Model: {MODEL}')
     print(f'  API Key: {"已配置" if API_KEY else "未配置 — 请编辑 config.json"}')
-    print(f'  地址: http://localhost:5000\n')
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    print(f'  地址: http://0.0.0.0:{port}\n')
+    app.run(host='0.0.0.0', port=port)
