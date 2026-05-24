@@ -1,0 +1,5 @@
+{
+    "api_key": "sk-your-deepseek-api-key-here",
+    "model": "deepseek-chat",
+    "base_url": "https://api.deepseek.com"
+}

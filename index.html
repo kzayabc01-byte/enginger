@@ -32,6 +32,9 @@
 </head>
 <body class="bg-white text-slate-800 font-sans antialiased selection:bg-emerald-100 selection:text-emerald-800">
 
+  <!-- Scroll progress bar -->
+  <div id="scrollProgress" class="fixed top-0 left-0 h-[3px] bg-emerald-500 z-[100] transition-[width] duration-150 rounded-r-full shadow-sm shadow-emerald-500/30"></div>
+
   <!-- ============================================
        NAVBAR — Sticky white + soft shadow
        ============================================ -->
@@ -52,6 +55,8 @@
         <a href="#cases"     class="px-4 py-2 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200">案例</a>
         <a href="#lab"       class="px-4 py-2 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200">实验室</a>
         <a href="#quiz"      class="px-4 py-2 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200">测评</a>
+        <a href="#roleplay"  class="px-4 py-2 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200">模拟</a>
+        <a href="#qa"        class="px-4 py-2 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200">AI问答</a>
       </div>
 
       <!-- Theme toggle -->
@@ -154,12 +159,22 @@
       </div>
 
       <!-- Horizontal scroll carousel -->
-      <div id="caseCarousel" class="flex gap-6 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-4 fade-up" data-fade>
-        <!-- Cards rendered by JS -->
+      <div class="relative fade-up" data-fade>
+        <button id="carouselPrev" class="carousel-arrow left-3" aria-label="上一个案例">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <div id="caseCarousel" class="flex gap-6 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-4">
+          <!-- Cards rendered by JS -->
+        </div>
+        <button id="carouselNext" class="carousel-arrow right-3" aria-label="下一个案例">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
       </div>
 
-      <div class="text-center mt-8 text-xs text-slate-400 font-normal">
-        ← 横向滑动浏览更多 →
+      <div class="text-center mt-6 text-xs text-slate-400 font-normal flex items-center justify-center gap-4">
+        <span>← 滑动浏览 →</span>
+        <span class="text-slate-300">|</span>
+        <span>← → 键盘翻页</span>
       </div>
 
     </div>
@@ -235,6 +250,146 @@
   </section>
 
   <!-- ============================================
+       SECTION 6 — ROLE PLAY (Scenario Simulation)
+       ============================================ -->
+  <section id="roleplay" class="py-32 px-6 bg-white">
+    <div class="max-w-4xl mx-auto">
+
+      <div class="text-center mb-16 fade-up" data-fade>
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-xs font-semibold tracking-wide text-rose-700 mb-5">
+          Role Play
+        </span>
+        <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">情景模拟扮演</h2>
+        <p class="text-slate-500 text-lg font-normal max-w-xl mx-auto">置身真实伦理困境，你的选择定义你的职业品格</p>
+      </div>
+
+      <!-- Scenario selection -->
+      <div id="scenarioPicker" class="grid md:grid-cols-3 gap-4 mb-10 fade-up" data-fade>
+        <div class="scenario-card rounded-2xl border-2 border-slate-200 bg-white p-6 cursor-pointer transition-all duration-300 hover:-translate-y-1 shadow-md" onclick="startRolePlay('data-breach')" data-scenario="data-breach">
+          <div class="w-10 h-10 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+          </div>
+          <h3 class="font-bold text-slate-800 mb-1">数据泄露应急</h3>
+          <p class="text-xs text-slate-500 leading-relaxed mb-3">你是安全工程师，凌晨2:15收到拖库警报</p>
+          <span class="text-xs text-rose-500 font-semibold">角色：安全工程师 →</span>
+        </div>
+
+        <div class="scenario-card rounded-2xl border-2 border-slate-200 bg-white p-6 cursor-pointer transition-all duration-300 hover:-translate-y-1 shadow-md" onclick="startRolePlay('compliance-audit')" data-scenario="compliance-audit">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+          </div>
+          <h3 class="font-bold text-slate-800 mb-1">甲方合规审查</h3>
+          <p class="text-xs text-slate-500 leading-relaxed mb-3">30天内证明GDPR合规，但你知道有差距</p>
+          <span class="text-xs text-amber-500 font-semibold">角色：技术负责人 →</span>
+        </div>
+
+        <div class="scenario-card rounded-2xl border-2 border-slate-200 bg-white p-6 cursor-pointer transition-all duration-300 hover:-translate-y-1 shadow-md" onclick="startRolePlay('insider-threat')" data-scenario="insider-threat">
+          <div class="w-10 h-10 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+          </div>
+          <h3 class="font-bold text-slate-800 mb-1">内部安全审计</h3>
+          <p class="text-xs text-slate-500 leading-relaxed mb-3">发现 mentor 在代码中留了后门，怎么办？</p>
+          <span class="text-xs text-violet-500 font-semibold">角色：安全审计员 →</span>
+        </div>
+      </div>
+
+      <!-- Chat area (hidden until scenario selected) -->
+      <div id="roleplayChat" class="hidden fade-up" data-fade>
+        <div class="rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+
+          <!-- Chat header -->
+          <div class="flex items-center justify-between px-5 py-3 bg-slate-100 border-b border-slate-200">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span id="roleplayTitle" class="text-xs text-slate-600 font-semibold tracking-wide">情景模拟中</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="testEvalCard()" class="text-xs text-amber-500 hover:text-amber-600 transition-colors font-medium border border-amber-300 rounded-lg px-2 py-0.5">🔧测试卡片</button>
+              <span class="text-[10px] text-slate-400 kbd-hint">Enter</span>
+              <span class="text-[10px] text-slate-400">发送</span>
+              <button onclick="resetRolePlay()" class="text-xs text-slate-400 hover:text-red-500 transition-colors font-medium ml-2">重置</button>
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div id="roleplayMessages" class="p-6 min-h-[380px] max-h-[500px] overflow-y-auto flex flex-col gap-4">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Input -->
+          <div class="border-t border-slate-200 px-5 py-4 bg-slate-50/50">
+            <div class="flex items-center gap-3">
+              <input id="roleplayInput" type="text" placeholder="输入你的行动或对话..." class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all duration-300" onkeydown="if(event.key==='Enter')sendRolePlayMessage()">
+              <button onclick="sendRolePlayMessage()" class="px-5 py-3 rounded-2xl bg-emerald-500 text-white text-sm font-semibold shadow-lg shadow-emerald-500/25 hover:bg-emerald-600 hover:shadow-emerald-500/35 transition-all duration-300 hover:-translate-y-0.5 shrink-0">
+                发送
+              </button>
+              <button id="rpEvalBtn" onclick="triggerEvaluation()" class="px-5 py-3 rounded-2xl bg-amber-500 text-white text-sm font-semibold shadow-lg shadow-amber-500/25 hover:bg-amber-600 hover:shadow-amber-500/35 transition-all duration-300 hover:-translate-y-0.5 shrink-0">
+                结束并评价
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 测评结果独立展示区 -->
+        <div id="roleplayEval" class="mt-6"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 7 — AI Q&A
+       ============================================ -->
+  <section id="qa" class="py-32 px-6 bg-slate-50">
+    <div class="max-w-3xl mx-auto">
+
+      <div class="text-center mb-16 fade-up" data-fade>
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold tracking-wide text-blue-700 mb-5">
+          AI Expert
+        </span>
+        <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">AI 安全伦理问答</h2>
+        <p class="text-slate-500 text-lg font-normal max-w-xl mx-auto">向 AI 安全专家提问，获取专业的伦理与合规建议</p>
+      </div>
+
+      <!-- Quick questions -->
+      <div class="flex flex-wrap gap-2 mb-8 justify-center fade-up" data-fade id="quickQuestions">
+        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('收集用户数据时需要遵循哪些基本原则？')">数据收集原则</span>
+        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('什么是开源协议的传染性？GPL和MIT的区别？')">开源协议传染性</span>
+        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('发现同事代码里有安全漏洞，我该怎么处理？')">安全漏洞上报</span>
+        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('AI换脸技术涉及哪些法律风险？')">AI换脸法律风险</span>
+        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('程序员需要对代码造成的后果负法律责任吗？')">程序员法律责任</span>
+      </div>
+
+      <!-- Chat area -->
+      <div class="fade-up" data-fade>
+        <div class="rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+
+          <!-- Messages -->
+          <div id="qaMessages" class="p-6 min-h-[320px] max-h-[500px] overflow-y-auto flex flex-col gap-4">
+            <div class="text-center text-slate-400 py-12">
+              <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg>
+              <p class="text-sm">向 AI 安全伦理专家提问</p>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div class="border-t border-slate-200 px-5 py-4 bg-slate-50/50">
+            <div class="flex items-center gap-3">
+              <input id="qaInput" type="text" placeholder="输入你的安全/伦理问题..." class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-300" onkeydown="if(event.key==='Enter')sendQAMessage()">
+              <button onclick="sendQAMessage()" class="px-5 py-3 rounded-2xl bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-500/25 hover:bg-blue-600 hover:shadow-blue-500/35 transition-all duration-300 hover:-translate-y-0.5 shrink-0">
+                提问
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================
        FOOTER
        ============================================ -->
   <footer class="py-20 px-6 border-t border-slate-100 bg-white">
@@ -262,6 +417,11 @@
       <p class="text-xs text-slate-400">&copy; 2025 代码之下 · 仅供教育演示用途</p>
     </div>
   </footer>
+
+  <!-- Back to top button -->
+  <button id="backToTop" class="fixed bottom-8 right-8 w-11 h-11 rounded-2xl bg-white border border-slate-200 shadow-lg shadow-slate-300/20 flex items-center justify-center text-slate-400 hover:text-emerald-500 hover:border-emerald-300 hover:shadow-emerald-500/10 transition-all duration-300 z-50 opacity-0 translate-y-4 pointer-events-none" aria-label="回到顶部">
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5m0 0l-6 6m6-6l6 6"/></svg>
+  </button>
 
   <!-- Main JavaScript -->
   <script src="main.js"></script>

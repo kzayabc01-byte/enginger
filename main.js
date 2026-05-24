@@ -1,5 +1,5 @@
 /* ============================================
-   《代码之下》— 主交互逻辑
+   《代码之下》— 主交互逻辑 (改进版)
    ============================================ */
 
 // ==============================================
@@ -211,7 +211,6 @@ function initTheme() {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
   }
 
-  // Default to light (education) mode
   const saved = localStorage.getItem('theme');
   const isDark = saved ? saved === 'dark' : false;
   setTheme(isDark);
@@ -225,22 +224,29 @@ function initTheme() {
 // ==============================================
 // 2. INTERSECTION OBSERVER — Fade-up
 // ==============================================
+let fadeObserver;
+
 function initScrollReveal() {
-  const elements = document.querySelectorAll('[data-fade]');
-  const observer = new IntersectionObserver((entries) => {
+  fadeObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
+        fadeObserver.unobserve(entry.target);
       }
     });
   }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
 
-  elements.forEach(el => observer.observe(el));
+  document.querySelectorAll('[data-fade]').forEach(el => fadeObserver.observe(el));
+}
+
+function reObserve() {
+  document.querySelectorAll('[data-fade]:not(.visible)').forEach(el => {
+    if (fadeObserver) fadeObserver.observe(el);
+  });
 }
 
 // ==============================================
-// 3. KNOWLEDGE CARDS — Render
+// 3. KNOWLEDGE CARDS — Render + Click toggle
 // ==============================================
 function renderKnowledgeCards() {
   const grid = document.getElementById('knowledgeGrid');
@@ -252,16 +258,9 @@ function renderKnowledgeCards() {
     'text-violet-500 bg-violet-50 border-violet-200'
   ];
 
-  const iconHoverGlows = [
-    'group-hover:shadow-emerald-500/20',
-    'group-hover:shadow-sky-500/20',
-    'group-hover:shadow-amber-500/20',
-    'group-hover:shadow-violet-500/20'
-  ];
-
   grid.innerHTML = knowledgeCards.map((card, i) => `
-    <div class="bento-card group rounded-3xl border border-slate-100 bg-white/80 backdrop-blur p-8 cursor-default fade-up shadow-lg shadow-slate-200/50 hover:shadow-xl delay-${i * 100}" data-fade>
-      <div class="w-14 h-14 rounded-2xl ${iconColors[i]} flex items-center justify-center mb-5 transition-all duration-500 group-hover:scale-110 group-hover:shadow-lg ${iconHoverGlows[i]} border">
+    <div class="bento-card group rounded-3xl border border-slate-100 bg-white/80 backdrop-blur p-8 cursor-pointer fade-up shadow-lg shadow-slate-200/50 hover:shadow-xl delay-${i * 100}" data-fade data-card-idx="${i}">
+      <div class="w-14 h-14 rounded-2xl ${iconColors[i]} flex items-center justify-center mb-5 transition-all duration-500 group-hover:scale-110 group-hover:shadow-lg border">
         <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           ${extractSvgPath(card.icon)}
         </svg>
@@ -273,11 +272,20 @@ function renderKnowledgeCards() {
           <div class="border-t border-slate-100 pt-4 mt-2 text-slate-400 text-sm leading-relaxed">${card.detail}</div>
         </div>
       </div>
+      <div class="mt-3 text-xs text-emerald-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 md:hidden">点击展开/收起详情</div>
     </div>
   `).join('');
+
+  // Click toggle for knowledge cards (mobile / explicit)
+  grid.querySelectorAll('.bento-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      // Don't toggle if user is selecting text
+      if (window.getSelection().toString()) return;
+      card.classList.toggle('expanded');
+    });
+  });
 }
 
-// Helper: extract inner SVG path from icon string for re-coloring
 function extractSvgPath(iconStr) {
   const m = iconStr.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
   return m ? m[1] : iconStr;
@@ -298,6 +306,76 @@ function renderCaseCarousel() {
       <p class="text-slate-500 text-sm leading-relaxed">${c.summary}</p>
     </div>
   `).join('');
+}
+
+// Carousel arrow navigation
+function initCarouselControls() {
+  const carousel = document.getElementById('caseCarousel');
+  const prevBtn = document.getElementById('carouselPrev');
+  const nextBtn = document.getElementById('carouselNext');
+
+  function getScrollAmount() {
+    const card = carousel.querySelector('.snap-start');
+    if (!card) return 400;
+    return card.offsetWidth + 24; // width + gap
+  }
+
+  function updateArrowVisibility() {
+    const tolerance = 10;
+    if (carousel.scrollLeft <= tolerance) {
+      prevBtn.style.opacity = '0.4';
+      prevBtn.style.pointerEvents = 'none';
+    } else {
+      prevBtn.style.opacity = '0.85';
+      prevBtn.style.pointerEvents = 'auto';
+    }
+    const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+    if (carousel.scrollLeft >= maxScroll - tolerance) {
+      nextBtn.style.opacity = '0.4';
+      nextBtn.style.pointerEvents = 'none';
+    } else {
+      nextBtn.style.opacity = '0.85';
+      nextBtn.style.pointerEvents = 'auto';
+    }
+  }
+
+  prevBtn.addEventListener('click', () => {
+    carousel.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+  });
+  nextBtn.addEventListener('click', () => {
+    carousel.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+  });
+
+  carousel.addEventListener('scroll', updateArrowVisibility, { passive: true });
+  window.addEventListener('resize', updateArrowVisibility);
+
+  // Initial state
+  setTimeout(updateArrowVisibility, 100);
+  setTimeout(updateArrowVisibility, 500);
+
+  // Drag to scroll
+  let isDown = false, startX, scrollStart;
+  carousel.addEventListener('mousedown', (e) => {
+    isDown = true;
+    carousel.classList.add('dragging');
+    startX = e.pageX - carousel.offsetLeft;
+    scrollStart = carousel.scrollLeft;
+  });
+  carousel.addEventListener('mouseleave', () => {
+    isDown = false;
+    carousel.classList.remove('dragging');
+  });
+  carousel.addEventListener('mouseup', () => {
+    isDown = false;
+    carousel.classList.remove('dragging');
+  });
+  carousel.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - carousel.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    carousel.scrollLeft = scrollStart - walk;
+  });
 }
 
 function openCaseModal(id) {
@@ -373,14 +451,19 @@ function renderLab() {
     const s = labScenarios[idx];
     container.innerHTML = `
       <div class="scenario-enter">
-        <div class="flex items-center gap-2 mb-5">
-          <span class="text-[10px] tracking-widest uppercase text-violet-600 px-2.5 py-1 rounded-full bg-violet-50 border border-violet-200 font-semibold">${s.title}</span>
-          <span class="text-[10px] text-slate-400 font-medium">情境 ${s.id}/${total}</span>
+        <div class="flex items-center justify-between mb-5">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] tracking-widest uppercase text-violet-600 px-2.5 py-1 rounded-full bg-violet-50 border border-violet-200 font-semibold">${s.title}</span>
+            <span class="text-[10px] text-slate-400 font-medium">情境 ${s.id}/${total}</span>
+          </div>
+          <span class="text-[10px] text-slate-400 flex items-center gap-1">
+            <span class="kbd-hint">A</span> / <span class="kbd-hint">B</span> 键选择
+          </span>
         </div>
         <p class="text-slate-700 leading-relaxed mb-8 text-sm md:text-base">${s.context}</p>
         <div class="space-y-3">
           ${s.options.map((opt, oi) => `
-            <button onclick="selectLabOption(${oi})" class="w-full text-left p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:border-violet-300 hover:bg-violet-50/50 transition-all duration-300 group flex items-start gap-4">
+            <button id="labOpt${oi}" onclick="selectLabOption(${oi})" class="w-full text-left p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:border-violet-300 hover:bg-violet-50/50 transition-all duration-300 group flex items-start gap-4">
               <span class="shrink-0 w-8 h-8 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-xs font-bold text-violet-500 group-hover:border-violet-300 group-hover:bg-violet-50 transition-all duration-300 mt-0.5">${opt.label[0]}</span>
               <div>
                 <p class="text-sm font-semibold text-slate-800 mb-1">${opt.label}</p>
@@ -389,8 +472,9 @@ function renderLab() {
             </button>
           `).join('')}
         </div>
-        <div class="mt-6 text-right">
+        <div class="mt-6 flex justify-between">
           <span class="text-xs text-slate-400 cursor-pointer hover:text-violet-500 transition-colors font-medium" onclick="if(labState.scenarioIndex>0){labState.scenarioIndex--;labState.phase='context';renderLab();}">${idx > 0 ? '← 返回上一情境' : ''}</span>
+          <span class="text-xs text-slate-300">场景 ${idx + 1}/${total}</span>
         </div>
       </div>
     `;
@@ -412,7 +496,10 @@ function renderLab() {
           }">${result.outcome.verdict}</span>
         </div>
         <p class="text-slate-700 leading-relaxed text-sm mb-8">${result.outcome.comment}</p>
-        <div class="flex items-center justify-center gap-4">
+        <div class="flex items-center justify-center gap-3 flex-wrap">
+          <button onclick="labState.phase='context';renderLab();" class="px-5 py-2.5 rounded-2xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold shadow-sm hover:border-violet-300 hover:text-violet-600 transition-all duration-300">
+            重新选择
+          </button>
           ${idx < total - 1 ? `
             <button onclick="labState.scenarioIndex++;labState.phase='context';renderLab();" class="px-6 py-2.5 rounded-2xl bg-violet-500 text-white text-sm font-semibold shadow-lg shadow-violet-500/25 hover:bg-violet-600 hover:shadow-violet-500/35 transition-all duration-300 hover:-translate-y-0.5">
               下一个情境 →
@@ -435,44 +522,77 @@ function selectLabOption(optionIndex) {
 }
 
 // ==============================================
-// 6. QUIZ — Single-question flow + Ring result
+// 6. QUIZ — Single-question flow + Feedback + Review
 // ==============================================
-let quizState = { current: 0, answers: [], finished: false };
+let quizState = { current: 0, answers: [], finished: false, feedbackLock: false };
+
+function jumpToQuestion(index) {
+  if (quizState.feedbackLock) return;
+  if (index < 0 || index >= quizQuestions.length) return;
+  quizState.current = index;
+  quizState.feedbackLock = false;
+  renderQuiz();
+}
 
 function renderQuiz() {
   const container = document.getElementById('quizContainer');
   const progress = document.getElementById('quizProgress');
 
-  // Progress dots
-  progress.innerHTML = quizQuestions.map((_, i) => {
+  // Progress dots (clickable)
+  progress.innerHTML = quizQuestions.map((q, i) => {
     let cls = 'bg-slate-200';
     if (quizState.answers[i] !== undefined) {
-      cls = quizState.answers[i] === quizQuestions[i].answer ? 'bg-emerald-500' : 'bg-red-400';
+      cls = quizState.answers[i] === q.answer ? 'bg-emerald-500' : 'bg-red-400';
     }
     if (i === quizState.current && !quizState.finished) cls += ' ring-2 ring-sky-400 ring-offset-2';
-    return `<span class="w-3 h-3 rounded-full transition-all duration-300 ${cls}"></span>`;
+    const dotCls = i < quizState.current || quizState.answers[i] !== undefined ? 'cursor-pointer' : 'cursor-default';
+    return `<span class="w-3 h-3 rounded-full transition-all duration-300 ${cls} ${dotCls}" onclick="jumpToQuestion(${i})" title="第${i+1}题"></span>`;
   }).join('');
 
   if (!quizState.finished) {
     const q = quizQuestions[quizState.current];
+    const hasAnswer = quizState.answers[quizState.current] !== undefined;
+    const showFeedback = quizState.feedbackLock && hasAnswer;
+    const chosen = quizState.answers[quizState.current];
+
     container.innerHTML = `
       <div class="scenario-enter">
-        <p class="text-xs tracking-widest uppercase text-sky-500 font-semibold mb-3">第 ${quizState.current + 1} / ${quizQuestions.length} 题</p>
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-xs tracking-widest uppercase text-sky-500 font-semibold">第 ${quizState.current + 1} / ${quizQuestions.length} 题</p>
+          <span class="text-[10px] text-slate-400 flex items-center gap-1">
+            按 <span class="kbd-hint">A</span>-<span class="kbd-hint">D</span> 选择
+          </span>
+        </div>
         <h3 class="text-lg font-bold mb-7 leading-relaxed text-slate-800">${q.q}</h3>
         <div class="space-y-3">
-          ${q.options.map((opt, oi) => `
-            <button onclick="answerQuiz(${oi})" class="w-full text-left p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:border-sky-300 hover:bg-sky-50/50 transition-all duration-300 flex items-center gap-4 group">
-              <span class="shrink-0 w-8 h-8 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-xs font-bold text-slate-400 group-hover:border-sky-300 group-hover:text-sky-500 group-hover:bg-sky-50 transition-all duration-300">${String.fromCharCode(65 + oi)}</span>
-              <span class="text-sm text-slate-600 font-medium">${opt}</span>
-            </button>
-          `).join('')}
+          ${q.options.map((opt, oi) => {
+            let extraCls = '';
+            if (showFeedback) {
+              if (oi === q.answer) extraCls = 'quiz-option-correct';
+              else if (oi === chosen && oi !== q.answer) extraCls = 'quiz-option-wrong';
+              else extraCls = 'quiz-option-dim';
+            }
+            return `
+              <button id="quizOpt${oi}" onclick="answerQuiz(${oi})" class="w-full text-left p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:border-sky-300 hover:bg-sky-50/50 transition-all duration-300 flex items-center gap-4 group ${extraCls}" ${quizState.feedbackLock ? 'disabled' : ''}>
+                <span class="shrink-0 w-8 h-8 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-xs font-bold text-slate-400 group-hover:border-sky-300 group-hover:text-sky-500 group-hover:bg-sky-50 transition-all duration-300">${String.fromCharCode(65 + oi)}</span>
+                <span class="text-sm text-slate-600 font-medium">${opt}</span>
+                ${showFeedback && oi === q.answer ? '<svg class="w-5 h-5 text-emerald-500 ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>' : ''}
+                ${showFeedback && oi === chosen && oi !== q.answer ? '<svg class="w-5 h-5 text-red-400 ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>' : ''}
+              </button>
+            `;
+          }).join('')}
+        </div>
+        <div class="mt-6 flex justify-between items-center">
+          <button onclick="goPrevQuestion()" class="text-xs text-slate-400 hover:text-sky-500 transition-colors font-medium ${quizState.current > 0 && !quizState.feedbackLock ? '' : 'invisible'}">← 上一题</button>
+          <span class="text-xs text-slate-300">${quizState.current + 1}/${quizQuestions.length}</span>
+          <span class="text-xs invisible">占位</span>
         </div>
       </div>
     `;
   } else {
-    // Show results
-    const total = quizQuestions.length;
+    // Show results with per-question review
     const correct = quizState.answers.filter((a, i) => a === quizQuestions[i].answer).length;
+    const total = quizQuestions.length;
     const pct = Math.round((correct / total) * 100);
     const circumference = 2 * Math.PI * 54;
     const offset = circumference - (correct / total) * circumference;
@@ -485,7 +605,7 @@ function renderQuiz() {
 
     container.innerHTML = `
       <div class="scenario-enter text-center">
-        <div class="relative inline-flex items-center justify-center mb-6">
+        <div class="relative inline-flex items-center justify-center mb-4">
           <svg class="w-36 h-36 -rotate-90" viewBox="0 0 120 120">
             <circle class="ring-bg" cx="60" cy="60" r="54" stroke-width="8" fill="none"/>
             <circle id="resultRing" class="ring-fill" cx="60" cy="60" r="54" stroke-width="8" fill="none"
@@ -495,8 +615,28 @@ function renderQuiz() {
         </div>
         <p class="text-xl font-bold mb-1 text-slate-800">评级：<span class="${gradeColor}">${grade}</span></p>
         <p class="text-slate-500 text-sm max-w-sm mx-auto mb-6 leading-relaxed">${advice}</p>
-        <p class="text-xs text-slate-400 mb-8">${correct} / ${total} 题正确</p>
-        <button onclick="quizState={current:0,answers:[],finished:false};renderQuiz();" class="px-6 py-2.5 rounded-2xl bg-sky-500 text-white text-sm font-semibold shadow-lg shadow-sky-500/25 hover:bg-sky-600 hover:shadow-sky-500/35 transition-all duration-300 hover:-translate-y-0.5">
+
+        <!-- Per-question review -->
+        <div class="space-y-2 text-left mb-8">
+          ${quizQuestions.map((q, i) => {
+            const userAns = quizState.answers[i];
+            const isCorrect = userAns === q.answer;
+            return `
+              <div class="quiz-review-item rounded-xl p-3 text-xs border ${isCorrect ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'}">
+                <div class="flex items-start gap-2">
+                  <span class="shrink-0 mt-0.5">${isCorrect ? '✅' : '❌'}</span>
+                  <div>
+                    <p class="font-semibold text-slate-700 mb-1">${i + 1}. ${q.q}</p>
+                    <p class="text-slate-500">你的答案：<span class="${isCorrect ? 'text-emerald-600 font-semibold' : 'text-red-500 font-semibold'}">${String.fromCharCode(65 + userAns)}. ${q.options[userAns]}</span></p>
+                    ${!isCorrect ? `<p class="text-emerald-600 mt-0.5">正确答案：${String.fromCharCode(65 + q.answer)}. ${q.options[q.answer]}</p>` : ''}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <button onclick="quizState={current:0,answers:[],finished:false,feedbackLock:false};renderQuiz();" class="px-6 py-2.5 rounded-2xl bg-sky-500 text-white text-sm font-semibold shadow-lg shadow-sky-500/25 hover:bg-sky-600 hover:shadow-sky-500/35 transition-all duration-300 hover:-translate-y-0.5">
           重新测评
         </button>
       </div>
@@ -510,14 +650,35 @@ function renderQuiz() {
   }
 }
 
-function answerQuiz(optionIndex) {
-  quizState.answers[quizState.current] = optionIndex;
-  if (quizState.current < quizQuestions.length - 1) {
-    quizState.current++;
-  } else {
-    quizState.finished = true;
+function goPrevQuestion() {
+  if (quizState.feedbackLock) return;
+  if (quizState.current > 0) {
+    quizState.current--;
+    quizState.feedbackLock = false;
+    renderQuiz();
   }
+}
+
+function answerQuiz(optionIndex) {
+  if (quizState.feedbackLock) return;
+
+  // If already showing feedback for this question, treat as advancing
+  quizState.answers[quizState.current] = optionIndex;
+
+  // Show feedback for 1s then advance
+  quizState.feedbackLock = true;
   renderQuiz();
+
+  setTimeout(() => {
+    quizState.feedbackLock = false;
+    if (quizState.current < quizQuestions.length - 1) {
+      quizState.current++;
+      renderQuiz();
+    } else {
+      quizState.finished = true;
+      renderQuiz();
+    }
+  }, 900);
 }
 
 // ==============================================
@@ -535,7 +696,136 @@ function renderTeam() {
 }
 
 // ==============================================
-// 8. Smooth scroll — Navbar links
+// 8. NAVBAR ACTIVE STATE TRACKING
+// ==============================================
+function initNavHighlight() {
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a[href^="#"]');
+
+  navLinks.forEach(link => link.classList.add('nav-link'));
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0, rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+}
+
+// ==============================================
+// 9. SCROLL PROGRESS + BACK TO TOP
+// ==============================================
+function initScrollUI() {
+  const progressBar = document.getElementById('scrollProgress');
+  const backToTop = document.getElementById('backToTop');
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
+        progressBar.style.width = pct + '%';
+
+        if (scrollTop > 500) {
+          backToTop.classList.add('visible');
+        } else {
+          backToTop.classList.remove('visible');
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+// ==============================================
+// 10. GLOBAL KEYBOARD SHORTCUTS
+// ==============================================
+function initKeyboard() {
+  document.addEventListener('keydown', (e) => {
+    // Escape: close case modal
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('caseModal');
+      if (modal && !modal.classList.contains('hidden')) {
+        closeCaseModal();
+        return;
+      }
+    }
+
+    // If user is typing in an input, ignore
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+
+    // Determine which section is in view
+    const labRect = document.getElementById('lab').getBoundingClientRect();
+    const quizRect = document.getElementById('quiz').getBoundingClientRect();
+    const casesRect = document.getElementById('cases').getBoundingClientRect();
+    const viewMiddle = window.innerHeight / 2;
+
+    const labInView = labRect.top < viewMiddle && labRect.bottom > viewMiddle;
+    const quizInView = quizRect.top < viewMiddle && quizRect.bottom > viewMiddle;
+    const casesInView = casesRect.top < viewMiddle && casesRect.bottom > viewMiddle;
+
+    // Left/Right arrows for carousel
+    if (casesInView && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      e.preventDefault();
+      const carousel = document.getElementById('caseCarousel');
+      const card = carousel.querySelector('.snap-start');
+      const amount = card ? card.offsetWidth + 24 : 400;
+      carousel.scrollBy({ left: e.key === 'ArrowLeft' ? -amount : amount, behavior: 'smooth' });
+      return;
+    }
+
+    // A/B keys for lab options
+    if (labInView && labState.phase === 'context' && (e.key === 'a' || e.key === 'A' || e.key === 'b' || e.key === 'B')) {
+      e.preventDefault();
+      const idx = e.key === 'a' || e.key === 'A' ? 0 : 1;
+      selectLabOption(idx);
+      return;
+    }
+
+    // A/B/C/D or 1-4 keys for quiz
+    if (quizInView && !quizState.finished && !quizState.feedbackLock) {
+      const q = quizQuestions[quizState.current];
+      let optIdx = -1;
+      if (e.key === 'a' || e.key === 'A') optIdx = 0;
+      else if (e.key === 'b' || e.key === 'B') optIdx = 1;
+      else if (e.key === 'c' || e.key === 'C') optIdx = 2;
+      else if (e.key === 'd' || e.key === 'D') optIdx = 3;
+      else if (e.key === '1') optIdx = 0;
+      else if (e.key === '2') optIdx = 1;
+      else if (e.key === '3') optIdx = 2;
+      else if (e.key === '4') optIdx = 3;
+
+      if (optIdx >= 0 && optIdx < q.options.length) {
+        e.preventDefault();
+        answerQuiz(optIdx);
+        return;
+      }
+
+      // Arrow left = previous question
+      if (e.key === 'ArrowLeft' && quizState.current > 0) {
+        e.preventDefault();
+        goPrevQuestion();
+        return;
+      }
+    }
+  });
+}
+
+// ==============================================
+// 11. SMOOTH SCROLL — Navbar links
 // ==============================================
 function initSmoothScroll() {
   document.querySelectorAll('a[href^="#"]').forEach(link => {
@@ -550,23 +840,602 @@ function initSmoothScroll() {
 }
 
 // ==============================================
-// 9. Re-observe after dynamic render
+// 12. ROLE PLAY — Scenario Simulation
 // ==============================================
-function reObserve() {
-  const elements = document.querySelectorAll('[data-fade]:not(.visible)');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
+const API_BASE = '';
+
+let rpSessionId = '';
+let rpActiveScenario = '';
+let rpIsTyping = false;   // typewriter lock
+let rpRoundCount = 0;     // 回合计数器
+let rpFinished = false;   // 模拟是否已结束（已出评价）
+const RP_MAX_ROUNDS = 5;  // 强制结束回合数
+
+function startRolePlay(scenario) {
+  rpActiveScenario = scenario;
+  rpSessionId = '';
+  rpRoundCount = 0;
+  rpFinished = false;
+  rpEvalShown = false;
+  document.getElementById('roleplayEval').innerHTML = '';
+  document.getElementById('rpEvalBtn').classList.remove('hidden');
+
+  // Highlight selected card
+  document.querySelectorAll('.scenario-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.scenario === scenario);
+  });
+
+  // Show chat area
+  const chatArea = document.getElementById('roleplayChat');
+  chatArea.classList.remove('hidden');
+  setTimeout(() => chatArea.classList.add('visible'), 50);
+
+  // Update title
+  const titles = {
+    'data-breach': '数据泄露应急 — 安全工程师',
+    'compliance-audit': '甲方合规审查 — 技术负责人',
+    'insider-threat': '内部安全审计 — 安全审计员'
+  };
+  document.getElementById('roleplayTitle').textContent = titles[scenario] || '情景模拟中';
+
+  // Show welcome message
+  const messages = document.getElementById('roleplayMessages');
+  const welcomes = {
+    'data-breach': '🌙 **凌晨 2:15** — 你的手机在床头剧烈震动。运维组长小李发来紧急消息：\n\n> "张工，生产数据库异常查询激增，疑似被拖库！怎么办？"\n\n你猛地坐起来，抓起笔记本电脑……',
+    'compliance-audit': '📋 **周一早会** — CEO老李在全体会议上宣布签下了欧洲大客户，全场掌声雷动。\n\n> "王工，GDPR合规这块你最熟，30天搞定没问题吧？"\n\n你低头看着手里的技术现状报告，心里一沉……',
+    'insider-threat': '🔍 **代码审查中** — 你在核心支付模块发现了一段可疑代码。Git blame 显示提交人是老赵——你的技术 mentor，在公司待了6年的资深工程师。\n\n> 这段代码可以绕过风控系统。\n\n你的鼠标悬停在"上报"按钮上……'
+  };
+  messages.innerHTML = `
+    <div class="chat-bubble ai markdown-body">${renderMarkdown(welcomes[scenario] || '情景已就绪，请开始你的行动。')}</div>
+  `;
+  messages.scrollTop = messages.scrollHeight;
+
+  // Focus input
+  document.getElementById('roleplayInput').value = '';
+  document.getElementById('roleplayInput').disabled = false;
+  document.getElementById('roleplayInput').placeholder = '输入你的行动或对话...';
+  document.getElementById('roleplayInput').focus();
+
+  // Scroll to chat
+  chatArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function sendRolePlayMessage() {
+  if (rpIsTyping || rpFinished) return;
+
+  const input = document.getElementById('roleplayInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.focus();
+
+  const messages = document.getElementById('roleplayMessages');
+
+  // Add user message
+  messages.innerHTML += `<div class="chat-bubble user">${escapeHtml(text)}</div>`;
+  messages.scrollTop = messages.scrollHeight;
+
+  rpRoundCount++;
+
+  console.log('[RolePlay] 回合:', rpRoundCount, '/', RP_MAX_ROUNDS);
+
+  // 达到最大回合 → 发送独立评价请求
+  if (rpRoundCount >= RP_MAX_ROUNDS) {
+    requestEvaluation();
+    return;
+  }
+
+  // 正常对话流程
+  const loadingId = 'rp-loading-' + Date.now();
+  messages.innerHTML += `
+    <div id="${loadingId}" class="chat-bubble ai">
+      <div class="typing-indicator">
+        <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+      </div>
+    </div>
+  `;
+  messages.scrollTop = messages.scrollHeight;
+
+  fetch(`${API_BASE}/api/roleplay`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      scenario: rpActiveScenario,
+      message: text,
+      session_id: rpSessionId
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    const loading = document.getElementById(loadingId);
+    if (loading) loading.remove();
+
+    if (data.error) {
+      messages.innerHTML += `<div class="chat-bubble ai" style="color:#EF4444;">⚠️ ${escapeHtml(data.error)}</div>`;
+    } else {
+      rpSessionId = data.session_id;
+      // 检测 AI 是否自然输出了评价
+      if (hasEvaluationMarkers(data.message)) {
+        const parsed = parseEvaluation(data.message);
+        if (parsed.storyEnding) {
+          typewriterEffect(messages, parsed.storyEnding, 'ai', () => {
+            setTimeout(() => showEvaluationCard(parsed), 400);
+          });
+        } else {
+          showEvaluationCard(parsed);
+        }
+        rpFinished = true;
+        lockRolePlayInput();
+      } else {
+        typewriterEffect(messages, data.message, 'ai');
       }
-    });
-  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
-  elements.forEach(el => observer.observe(el));
+    }
+    messages.scrollTop = messages.scrollHeight;
+  })
+  .catch(err => {
+    const loading = document.getElementById(loadingId);
+    if (loading) loading.remove();
+    messages.innerHTML += `<div class="chat-bubble ai" style="color:#EF4444;">⚠️ 网络错误：${escapeHtml(err.message)}<br><span style="font-size:12px;color:#94a3b8;">请确认 server.py 已启动</span></div>`;
+    messages.scrollTop = messages.scrollHeight;
+  });
+}
+
+function triggerEvaluation() {
+  console.log('[Eval] 手动触发评价请求, session:', rpSessionId);
+  if (rpIsTyping || rpFinished) {
+    console.log('[Eval] 阻塞: isTyping=', rpIsTyping, 'finished=', rpFinished);
+    return;
+  }
+  if (!rpSessionId) {
+    console.log('[Eval] 阻塞: 无 session，请先至少发送一条消息');
+    alert('请先至少发送一条消息后再查看评价');
+    return;
+  }
+  requestEvaluation();
+}
+
+function requestEvaluation() {
+  console.log('[Eval] 发送评价请求...');
+  const messages = document.getElementById('roleplayMessages');
+  const loadingId = 'rp-eval-loading-' + Date.now();
+  messages.innerHTML += `
+    <div id="${loadingId}" class="chat-bubble ai">
+      <div class="typing-indicator">
+        <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+      </div>
+    </div>
+  `;
+  messages.scrollTop = messages.scrollHeight;
+
+  fetch(`${API_BASE}/api/evaluate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      scenario: rpActiveScenario,
+      session_id: rpSessionId
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    const loading = document.getElementById(loadingId);
+    if (loading) loading.remove();
+
+    if (data.error) {
+      console.log('[Eval] API 返回错误:', data.error);
+      messages.innerHTML += `<div class="chat-bubble ai" style="color:#EF4444;">⚠️ ${escapeHtml(data.error)}</div>`;
+      showFallbackEvalCard();
+    } else {
+      console.log('[Eval] API 返回成功, 消息长度:', data.message.length);
+      const parsed = parseEvaluation(data.message);
+      console.log('[Eval] 解析结果 — ending:', !!parsed.storyEnding, 'scores:', Object.keys(parsed.scores).length, 'overall:', !!parsed.overall);
+      showEvaluationCard(parsed);
+    }
+    rpFinished = true;
+    lockRolePlayInput();
+    messages.scrollTop = messages.scrollHeight;
+  })
+  .catch(err => {
+    const loading = document.getElementById(loadingId);
+    if (loading) loading.remove();
+    messages.innerHTML += `<div class="chat-bubble ai" style="color:#EF4444;">⚠️ 网络错误：${escapeHtml(err.message)}</div>`;
+    showFallbackEvalCard();
+    rpFinished = true;
+    lockRolePlayInput();
+    messages.scrollTop = messages.scrollHeight;
+  });
+}
+
+function showFallbackEvalCard() {
+  const evalArea = document.getElementById('roleplayEval');
+  const defaultDims = ['伦理意识', '法律合规', '沟通能力', '决策果断性'];
+  const scoreBars = defaultDims.map(dim => `
+    <div class="eval-dimension">
+      <div class="eval-dim-header">
+        <span class="eval-dim-name">${dim}</span>
+        <span class="eval-dim-score" style="color:#94a3b8;">—/10</span>
+      </div>
+      <div class="eval-bar-track">
+        <div class="eval-bar-fill" style="width:0%;background:#94a3b8;"></div>
+      </div>
+    </div>
+  `).join('');
+
+  evalArea.innerHTML = `
+    <div class="eval-card">
+      <div class="eval-header">
+        <span class="eval-icon">📋</span>
+        <span class="eval-title">模拟结束</span>
+      </div>
+      <div class="eval-body">
+        <p style="color:#64748b;font-size:14px;margin-bottom:16px;text-align:center;">情景模拟已完成，但 AI 评价生成失败。</p>
+        ${scoreBars}
+        <p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:12px;">请重新开始，或检查 server.py 是否正常运行。</p>
+      </div>
+      <div class="eval-actions">
+        <button onclick="resetRolePlay()" class="eval-restart-btn">重新选择场景</button>
+        <button onclick="startRolePlay('${rpActiveScenario}')" class="eval-retry-btn">再试一次</button>
+      </div>
+    </div>
+  `;
+}
+
+function resetRolePlay() {
+  rpSessionId = '';
+  rpActiveScenario = '';
+  rpIsTyping = false;
+  rpRoundCount = 0;
+  rpFinished = false;
+  rpEvalShown = false;
+  document.getElementById('roleplayMessages').innerHTML = '';
+  document.getElementById('roleplayEval').innerHTML = '';
+  document.getElementById('roleplayChat').classList.add('hidden');
+  document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('roleplayInput').value = '';
+  document.getElementById('roleplayInput').disabled = false;
+  document.getElementById('roleplayInput').placeholder = '输入你的行动或对话...';
+  document.getElementById('rpEvalBtn').classList.remove('hidden');
+
+  // Tell server to reset
+  fetch(`${API_BASE}/api/reset`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: rpSessionId })
+  }).catch(() => {});
 }
 
 // ==============================================
-// 10. BOOT
+// 12b. ROLE PLAY — Evaluation System
+// ==============================================
+
+function hasEvaluationMarkers(text) {
+  return /\[评价\]|【评价】|\[場景結局\]|【场景结局】|\[场景结局\]/.test(text);
+}
+
+function parseEvaluation(text) {
+  const result = {
+    storyEnding: '',
+    scores: {},
+    overall: '',
+    raw: text
+  };
+
+  // 提取 [场景结局] / 【场景结局】
+  const endingMatch = text.match(/(?:\[场景结局\]|【场景结局】|\[場景結局\])\s*([\s\S]*?)(?=\[评价\]|【评价】|\[总评\]|【总评】|$)/);
+  if (endingMatch) {
+    result.storyEnding = endingMatch[1].trim();
+  }
+
+  // 提取 [评价] / 【评价】
+  const evalMatch = text.match(/(?:\[评价\]|【评价】)\s*([\s\S]*?)(?=\[总评\]|【总评】|$)/);
+  const evalText = evalMatch ? evalMatch[1] : text;
+
+  const dimensions = ['伦理意识', '法律合规', '沟通能力', '决策果断性'];
+  dimensions.forEach(dim => {
+    // 匹配 "维度名：X/10 — 评语" 或 "维度名: X/10 - 评语"
+    const re = new RegExp(`${dim}\\s*[：:]\\s*(\\d+)\\s*/\\s*10\\s*[—\\-–:：]*\\s*(.+?)(?=\\n|${dimensions.join('|')}|$)`, 'i');
+    const m = evalText.match(re);
+    if (m) {
+      result.scores[dim] = {
+        score: Math.min(10, Math.max(1, parseInt(m[1]))),
+        comment: m[2].trim().replace(/[—\\-–]\s*$/, '')
+      };
+    }
+  });
+
+  // 提取 [总评] / 【总评】
+  const overallMatch = text.match(/(?:\[总评\]|【总评】)\s*([\s\S]*?)$/);
+  if (overallMatch) {
+    result.overall = overallMatch[1].trim();
+  }
+
+  // 兜底
+  if (!result.storyEnding && Object.keys(result.scores).length === 0) {
+    result.storyEnding = text;
+  }
+
+  return result;
+}
+
+let rpEvalShown = false;
+
+function showEvaluationCard(parsed) {
+  console.log('[Eval] showEvaluationCard 被调用, scores:', Object.keys(parsed.scores));
+  if (rpEvalShown) {
+    console.log('[Eval] 阻塞: 已显示过评价');
+    return;
+  }
+  rpEvalShown = true;
+
+  const evalArea = document.getElementById('roleplayEval');
+  console.log('[Eval] evalArea 元素:', evalArea ? 'found' : 'NOT FOUND');
+  const defaultDims = ['伦理意识', '法律合规', '沟通能力', '决策果断性'];
+  const hasScores = Object.keys(parsed.scores).length > 0;
+
+  if (!hasScores) {
+    evalArea.innerHTML = `
+      <div class="eval-card">
+        <div class="eval-header">
+          <span class="eval-icon">📋</span>
+          <span class="eval-title">模拟结束</span>
+        </div>
+        <div class="eval-body">
+          <p style="color:#64748b;font-size:14px;margin-bottom:12px;">${escapeHtml(parsed.storyEnding || '情景模拟已完成。')}</p>
+          <p style="color:#94a3b8;font-size:12px;">请重新开始体验不同选择带来的不同结局。</p>
+        </div>
+        <div class="eval-actions">
+          <button onclick="resetRolePlay()" class="eval-restart-btn">重新选择场景</button>
+          <button onclick="startRolePlay('${rpActiveScenario}')" class="eval-retry-btn">再试一次</button>
+        </div>
+      </div>
+    `;
+  } else {
+    const avgScore = Math.round(
+      defaultDims.reduce((sum, d) => sum + (parsed.scores[d] ? parsed.scores[d].score : 0), 0) / defaultDims.length
+    );
+
+    const gradeColor = avgScore >= 8 ? '#10B981' : avgScore >= 6 ? '#F59E0B' : '#EF4444';
+    const gradeText = avgScore >= 8 ? '优秀' : avgScore >= 6 ? '良好' : '需改进';
+
+    const scoreBars = defaultDims.map(dim => {
+      const s = parsed.scores[dim];
+      if (!s) return '';
+      const pct = s.score * 10;
+      const barColor = s.score >= 8 ? '#10B981' : s.score >= 6 ? '#F59E0B' : '#EF4444';
+      return `
+        <div class="eval-dimension">
+          <div class="eval-dim-header">
+            <span class="eval-dim-name">${dim}</span>
+            <span class="eval-dim-score" style="color:${barColor}">${s.score}/10</span>
+          </div>
+          <div class="eval-bar-track">
+            <div class="eval-bar-fill" style="width:${pct}%;background:${barColor};"></div>
+          </div>
+          <p class="eval-dim-comment">${escapeHtml(s.comment)}</p>
+        </div>
+      `;
+    }).join('');
+
+    evalArea.innerHTML = `
+      <div class="eval-card">
+        <div class="eval-header">
+          <div class="eval-grade-badge" style="background:${gradeColor};">
+            <span class="eval-grade-text">${gradeText}</span>
+            <span class="eval-grade-score">${avgScore}/10</span>
+          </div>
+        </div>
+        <div class="eval-body">
+          <div class="eval-scores">${scoreBars}</div>
+          ${parsed.overall ? `
+            <div class="eval-overall">
+              <span class="eval-overall-label">总评</span>
+              <p class="eval-overall-text">${escapeHtml(parsed.overall)}</p>
+            </div>
+          ` : ''}
+        </div>
+        <div class="eval-actions">
+          <button onclick="resetRolePlay()" class="eval-restart-btn">重新选择场景</button>
+          <button onclick="startRolePlay('${rpActiveScenario}')" class="eval-retry-btn">再试一次这个场景</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // 滚动测评区域到可视位置
+  evalArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function lockRolePlayInput() {
+  const input = document.getElementById('roleplayInput');
+  input.disabled = true;
+  input.placeholder = '模拟已结束，查看你的评价结果吧';
+  const evalBtn = document.getElementById('rpEvalBtn');
+  if (evalBtn) evalBtn.classList.add('hidden');
+}
+
+// ==============================================
+// 13. AI Q&A — Expert Chat
+// ==============================================
+let qaSessionId = '';
+let qaIsTyping = false;
+
+function sendQAMessage() {
+  if (qaIsTyping) return;
+
+  const input = document.getElementById('qaInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.focus();
+
+  const messages = document.getElementById('qaMessages');
+
+  // Remove placeholder if present
+  const placeholder = messages.querySelector('.text-center');
+  if (placeholder) placeholder.remove();
+
+  // Add user message
+  messages.innerHTML += `<div class="chat-bubble user">${escapeHtml(text)}</div>`;
+
+  // Loading
+  const loadingId = 'qa-loading-' + Date.now();
+  messages.innerHTML += `
+    <div id="${loadingId}" class="chat-bubble ai">
+      <div class="typing-indicator">
+        <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+      </div>
+    </div>
+  `;
+  messages.scrollTop = messages.scrollHeight;
+
+  fetch(`${API_BASE}/api/qa`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      question: text,
+      session_id: qaSessionId
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    const loading = document.getElementById(loadingId);
+    if (loading) loading.remove();
+
+    if (data.error) {
+      messages.innerHTML += `<div class="chat-bubble ai" style="color:#EF4444;">⚠️ ${escapeHtml(data.error)}</div>`;
+    } else {
+      qaSessionId = data.session_id;
+      typewriterEffect(messages, data.message, 'ai');
+    }
+    messages.scrollTop = messages.scrollHeight;
+  })
+  .catch(err => {
+    const loading = document.getElementById(loadingId);
+    if (loading) loading.remove();
+    messages.innerHTML += `<div class="chat-bubble ai" style="color:#EF4444;">⚠️ 网络错误：${escapeHtml(err.message)}<br><span style="font-size:12px;color:#94a3b8;">请确认 server.py 已启动</span></div>`;
+    messages.scrollTop = messages.scrollHeight;
+  });
+}
+
+function askQuickQuestion(question) {
+  document.getElementById('qaInput').value = question;
+  sendQAMessage();
+}
+
+// ==============================================
+// 14. TYPEWRITER EFFECT
+// ==============================================
+function typewriterEffect(container, text, bubbleClass, onComplete) {
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble ' + bubbleClass + ' typing-cursor';
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+
+  const rendered = renderMarkdown(text);
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = rendered;
+  const plainText = tempDiv.textContent;
+  const totalChars = plainText.length;
+
+  let idx = 0;
+  const speed = totalChars > 300 ? 15 : 25; // faster for long text
+
+  const skipBtn = document.createElement('span');
+  skipBtn.className = 'skip-btn';
+  skipBtn.textContent = '跳过';
+  skipBtn.onclick = () => {
+    clearInterval(timer);
+    bubble.innerHTML = rendered;
+    bubble.classList.remove('typing-cursor');
+    skipBtn.remove();
+    rpIsTyping = false;
+    qaIsTyping = false;
+    container.scrollTop = container.scrollHeight;
+    if (onComplete) onComplete();
+  };
+  bubble.appendChild(skipBtn);
+
+  rpIsTyping = true;
+  qaIsTyping = true;
+
+  const timer = setInterval(() => {
+    idx++;
+    if (idx >= totalChars) {
+      clearInterval(timer);
+      bubble.innerHTML = rendered;
+      bubble.classList.remove('typing-cursor');
+      skipBtn.remove();
+      rpIsTyping = false;
+      qaIsTyping = false;
+      container.scrollTop = container.scrollHeight;
+      if (onComplete) onComplete();
+      return;
+    }
+
+    // Show partial markdown (simple — just show partial text with markdown applied progressively)
+    const partial = plainText.slice(0, idx);
+    bubble.innerHTML = renderMarkdown(partial) + '<span class="typing-cursor"></span>';
+    bubble.appendChild(skipBtn);
+    container.scrollTop = container.scrollHeight;
+  }, speed);
+}
+
+// ==============================================
+// 15. UTILITIES
+// ==============================================
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderMarkdown(text) {
+  if (!text) return '';
+  let html = escapeHtml(text);
+
+  // Bold
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Italic
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  // Code
+  html = html.replace(/`(.+?)`/g, '<code>$1</code>');
+  // Blockquote
+  html = html.replace(/^&gt; (.+)$/gm, '<blockquote style="border-left:3px solid #10B981;padding-left:12px;margin:8px 0;color:#64748b;">$1</blockquote>');
+  // Newlines to <br>
+  html = html.replace(/\n/g, '<br>');
+
+  return html;
+}
+
+// ==============================================
+// 15b. DEBUG — 直接测试评价卡片渲染
+// ==============================================
+function testEvalCard() {
+  const evalArea = document.getElementById('roleplayEval');
+  if (!evalArea) {
+    alert('roleplayEval 元素不存在！请先选择一个场景');
+    return;
+  }
+  rpActiveScenario = rpActiveScenario || 'data-breach';
+  const testData = {
+    storyEnding: '测试：你成功处理了数据泄露事件，公司避免了重大损失。',
+    scores: {
+      '伦理意识': { score: 8, comment: '表现良好' },
+      '法律合规': { score: 7, comment: '基本合规' },
+      '沟通能力': { score: 9, comment: '沟通出色' },
+      '决策果断性': { score: 6, comment: '需更果断' }
+    },
+    overall: '这是一条测试总评。你在模拟中展现了不错的素养。'
+  };
+  rpEvalShown = false;
+  rpFinished = true;
+  lockRolePlayInput();
+  showEvaluationCard(testData);
+}
+
+// ==============================================
+// 16. BOOT
 // ==============================================
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
@@ -574,10 +1443,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderKnowledgeCards();
   renderCaseCarousel();
+  initCarouselControls();
   renderLab();
   renderQuiz();
   renderTeam();
 
-  initScrollReveal(); // catch static [data-fade]
-  reObserve();        // catch dynamically rendered [data-fade]
+  initScrollReveal();
+  reObserve();
+
+  initNavHighlight();
+  initScrollUI();
+  initKeyboard();
 });
