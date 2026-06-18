@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>代码之下 — 程序员的职业伦理与信息安全交互展厅</title>
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: LXGW WenKai (霞鹜文楷) + Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,300;1,14..32,400;1,14..32,500;1,14..32,600;1,14..32,700&family=LXGW+WenKai:wght@300;400;500;700&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,7 +17,7 @@
       darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          fontFamily: { sans: ['"LXGW WenKai"', '"Noto Serif SC"', 'Inter', '"Microsoft YaHei"', 'system-ui', 'sans-serif'] },
           colors: {
             accent: { DEFAULT: '#10B981', dim: '#059669' },
             wisdom: { DEFAULT: '#10B981', light: '#D1FAE5', warm: '#F59E0B' }
@@ -32,8 +32,16 @@
 </head>
 <body class="bg-white text-slate-800 font-sans antialiased selection:bg-emerald-100 selection:text-emerald-800">
 
+  <!-- Floating background orbs (React Bits inspired) -->
+  <div class="bg-floating-orb orb-a" aria-hidden="true"></div>
+  <div class="bg-floating-orb orb-b" aria-hidden="true"></div>
+  <div class="bg-floating-orb orb-c" aria-hidden="true"></div>
+
   <!-- Scroll progress bar -->
   <div id="scrollProgress" class="fixed top-0 left-0 h-[3px] bg-emerald-500 z-[100] transition-[width] duration-150 rounded-r-full shadow-sm shadow-emerald-500/30"></div>
+
+  <!-- Cursor sparkle canvas -->
+  <canvas id="sparkleCanvas" class="fixed inset-0 pointer-events-none z-[98]"></canvas>
 
   <!-- ============================================
        NAVBAR — Sticky white + soft shadow
@@ -59,6 +67,13 @@
         <a href="#qa"        class="px-4 py-2 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200">AI问答</a>
       </div>
 
+      <!-- Mobile hamburger -->
+      <button id="mobileMenuBtn" class="md:hidden w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-1 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-300" aria-label="菜单">
+        <span class="hamburger-line w-4 h-0.5 bg-slate-500 rounded-full transition-all duration-300"></span>
+        <span class="hamburger-line w-4 h-0.5 bg-slate-500 rounded-full transition-all duration-300"></span>
+        <span class="hamburger-line w-4 h-0.5 bg-slate-500 rounded-full transition-all duration-300"></span>
+      </button>
+
       <!-- Theme toggle -->
       <button id="themeToggle" class="w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-300" aria-label="切换亮暗模式">
         <svg id="sunIcon" class="w-4 h-4 text-amber-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -71,6 +86,25 @@
     </div>
   </nav>
 
+  <!-- Mobile nav drawer -->
+  <div id="mobileDrawer" class="fixed inset-0 z-40 pointer-events-none">
+    <div id="mobileOverlay" class="absolute inset-0 bg-black/0 transition-colors duration-300"></div>
+    <div id="mobilePanel" class="absolute top-0 right-0 h-full w-64 bg-white shadow-2xl border-l border-slate-200 translate-x-full transition-transform duration-300 ease-out flex flex-col">
+      <div class="flex items-center justify-between px-5 h-16 border-b border-slate-100">
+        <span class="text-sm font-bold text-slate-700">导航菜单</span>
+        <button id="mobileCloseBtn" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">&times;</button>
+      </div>
+      <div class="flex flex-col gap-1 p-3 flex-1">
+        <a href="#knowledge" class="mobile-nav-link px-4 py-3 rounded-xl text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200 font-medium">📚 知识展厅</a>
+        <a href="#cases"     class="mobile-nav-link px-4 py-3 rounded-xl text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200 font-medium">⚠️ 警示案例馆</a>
+        <a href="#lab"       class="mobile-nav-link px-4 py-3 rounded-xl text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200 font-medium">🧪 伦理抉择实验室</a>
+        <a href="#quiz"      class="mobile-nav-link px-4 py-3 rounded-xl text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200 font-medium">📝 素养测评</a>
+        <a href="#roleplay"  class="mobile-nav-link px-4 py-3 rounded-xl text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200 font-medium">🎭 情景模拟</a>
+        <a href="#qa"        class="mobile-nav-link px-4 py-3 rounded-xl text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200 font-medium">🤖 AI问答</a>
+      </div>
+    </div>
+  </div>
+
   <!-- ============================================
        SECTION 1 — HERO (Education Style)
        ============================================ -->
@@ -78,12 +112,41 @@
 
     <!-- Decorative floating shapes -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <!-- Morphing SVG blob -->
+      <div class="morph-blob-container">
+        <svg class="morph-blob" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="blobGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#10B981;stop-opacity:0.15"/>
+              <stop offset="50%" style="stop-color:#34D399;stop-opacity:0.08"/>
+              <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:0.12"/>
+            </linearGradient>
+          </defs>
+          <path id="morphPath" fill="url(#blobGrad1)"/>
+        </svg>
+      </div>
       <!-- Large soft green orb -->
       <div class="orb-1 absolute -top-20 -right-20 w-[600px] h-[600px] rounded-full bg-emerald-200/30 blur-[120px]"></div>
       <!-- Warm amber orb -->
       <div class="orb-2 absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full bg-amber-100/40 blur-[130px]"></div>
+      <!-- Extra subtle orbs -->
+      <div class="orb-3 absolute top-1/2 left-1/4 w-[350px] h-[350px] rounded-full bg-sky-100/20 blur-[100px]"></div>
+      <div class="orb-4 absolute bottom-1/4 right-1/4 w-[250px] h-[250px] rounded-full bg-violet-100/20 blur-[90px]"></div>
       <!-- Subtle grid overlay -->
       <div class="hero-grid absolute inset-0"></div>
+      <!-- Floating particles -->
+      <div class="hero-particle p-1"></div>
+      <div class="hero-particle p-2"></div>
+      <div class="hero-particle p-3"></div>
+      <div class="hero-particle p-4"></div>
+      <div class="hero-particle p-5"></div>
+      <!-- Binary rain + code decorations -->
+      <span class="eng-deco ed-binary ed-bi1">01000101 01110100</span>
+      <span class="eng-deco ed-binary ed-bi2">01101000 01101001</span>
+      <span class="eng-deco ed-binary ed-bi3">01100011 01110011</span>
+      <span class="eng-deco ed-tag ed-tg1">&lt;code&gt;</span>
+      <span class="eng-deco ed-tag ed-tg2">&lt;/code&gt;</span>
+      <span class="eng-deco ed-brace ed-br1">def __init__(self):</span>
     </div>
 
     <div class="relative z-10 text-center px-6 max-w-4xl mx-auto fade-up" data-fade>
@@ -95,17 +158,17 @@
 
       <!-- Main title -->
       <h1 class="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-6 leading-[1.05] text-slate-900">
-        代码<span class="text-gradient-edu">之下</span>
+        代码<span class="shiny-text">之下</span>
       </h1>
 
       <!-- Subtitle -->
-      <p class="text-lg md:text-xl text-slate-500 font-normal mb-12 max-w-2xl mx-auto leading-relaxed">
+      <p id="heroSubtitle" class="text-lg md:text-xl text-slate-500 font-normal mb-12 max-w-2xl mx-auto leading-relaxed hero-subtitle-wrapper">
         每一行代码，都承载着工程师的责任与伦理
       </p>
 
       <!-- CTA buttons -->
       <div class="flex items-center justify-center gap-4">
-        <a href="#knowledge" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-emerald-500 text-white text-sm font-semibold shadow-lg shadow-emerald-500/25 hover:bg-emerald-600 hover:shadow-emerald-500/35 transition-all duration-300 hover:-translate-y-0.5">
+        <a href="#knowledge" class="magnetic-btn inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-emerald-500 text-white text-sm font-semibold shadow-lg shadow-emerald-500/25 hover:bg-emerald-600 hover:shadow-emerald-500/35 transition-all duration-300 hover:-translate-y-0.5">
           开始探索
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
         </a>
@@ -124,13 +187,26 @@
   <!-- ============================================
        SECTION 2 — KNOWLEDGE (Education Cards)
        ============================================ -->
-  <section id="knowledge" class="py-32 px-6 bg-white">
-    <div class="max-w-6xl mx-auto">
+  <section id="knowledge" class="py-32 px-6 bg-white relative overflow-hidden">
+    <!-- Decorative background -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <div class="section-orb orb-knowledge-1"></div>
+      <div class="section-orb orb-knowledge-2"></div>
+      <div class="section-dot-pattern"></div>
+      <span class="eng-deco ed-bracket ed-b1">{ }</span>
+      <span class="eng-deco ed-bracket ed-b2">&lt;/&gt;</span>
+      <span class="eng-deco ed-prompt ed-p1">$ npm run build</span>
+      <span class="eng-deco ed-prompt ed-p2">$ git commit -m "ethics"</span>
+      <span class="eng-deco ed-hash ed-h1">#include &lt;ethics.h&gt;</span>
+      <span class="eng-deco ed-keycap ed-k1">Ctrl</span>
+      <span class="eng-deco ed-keycap ed-k2">Enter</span>
+    </div>
+    <div class="max-w-6xl mx-auto relative z-10">
 
       <!-- Section header -->
       <div class="text-center mb-20 fade-up" data-fade>
         <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold tracking-wide text-emerald-700 mb-5">
-          Knowledge Gallery
+          Knowledge Gallery · <span data-count="4" data-suffix="大核心"></span>
         </span>
         <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">知识展厅</h2>
         <p class="text-slate-500 text-lg font-normal max-w-xl mx-auto">探索程序员职业素养的四大核心支柱</p>
@@ -147,12 +223,21 @@
   <!-- ============================================
        SECTION 3 — CASES (Carousel + Modal)
        ============================================ -->
-  <section id="cases" class="py-32 px-6 bg-slate-50">
-    <div class="max-w-6xl mx-auto">
+  <section id="cases" class="py-32 px-6 bg-slate-50 relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <div class="section-orb orb-cases-1"></div>
+      <div class="section-wave-pattern"></div>
+      <span class="eng-deco ed-log ed-l1">[ERR] Connection refused 192.168.1.107:5432</span>
+      <span class="eng-deco ed-log ed-l2">[WARN] Unauthorized access attempt #2847</span>
+      <span class="eng-deco ed-diff ed-d1">-&nbsp;&nbsp;<span class="diff-del">password="admin123"</span></span>
+      <span class="eng-deco ed-diff ed-d2">+&nbsp;&nbsp;<span class="diff-add">password=env("DB_PASS")</span></span>
+      <span class="eng-deco ed-stripe"></span>
+    </div>
+    <div class="max-w-6xl mx-auto relative z-10">
 
       <div class="text-center mb-20 fade-up" data-fade>
         <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-xs font-semibold tracking-wide text-amber-700 mb-5">
-          Case Studies
+          Case Studies · <span data-count="20" data-suffix="个真实案例"></span>
         </span>
         <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">警示案例馆</h2>
         <p class="text-slate-500 text-lg font-normal max-w-xl mx-auto">以史为鉴，让每一次敲击键盘都心存敬畏</p>
@@ -171,10 +256,15 @@
         </button>
       </div>
 
-      <div class="text-center mt-6 text-xs text-slate-400 font-normal flex items-center justify-center gap-4">
+      <div id="carouselDots" class="flex items-center justify-center gap-1.5 mt-6">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="text-center mt-3 text-xs text-slate-400 font-normal flex items-center justify-center gap-4">
         <span>← 滑动浏览 →</span>
         <span class="text-slate-300">|</span>
         <span>← → 键盘翻页</span>
+        <span class="text-slate-300">|</span>
+        <span id="carouselCounter" class="text-emerald-500 font-semibold">1/20</span>
       </div>
 
     </div>
@@ -188,12 +278,22 @@
   <!-- ============================================
        SECTION 4 — LAB (Ethical Dilemma)
        ============================================ -->
-  <section id="lab" class="py-32 px-6 bg-white">
-    <div class="max-w-4xl mx-auto">
+  <section id="lab" class="py-32 px-6 bg-white relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <div class="section-orb orb-lab-1"></div>
+      <div class="section-orb orb-lab-2"></div>
+      <div class="section-grid-subtle"></div>
+      <span class="eng-deco ed-term ed-t1">~/ethics_lab $ ./decide --dilemma=privacy</span>
+      <span class="eng-deco ed-term ed-t2">$ git blame core/auth.py -L 142,142</span>
+      <span class="eng-deco ed-code ed-c1"><span class="code-kw">def</span> <span class="code-fn">check_auth</span>(token):</span>
+      <span class="eng-deco ed-code ed-c2">&nbsp;&nbsp;<span class="code-kw">if</span> token == <span class="code-str">"master_key"</span>: <span class="code-cmt"># TODO: remove</span></span>
+      <span class="eng-deco ed-sha">commit a8f3c91</span>
+    </div>
+    <div class="max-w-4xl mx-auto relative z-10">
 
       <div class="text-center mb-20 fade-up" data-fade>
         <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-50 border border-violet-200 text-xs font-semibold tracking-wide text-violet-700 mb-5">
-          Ethics Lab
+          Ethics Lab · <span data-count="8" data-suffix="个伦理困境"></span>
         </span>
         <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">伦理抉择实验室</h2>
         <p class="text-slate-500 text-lg font-normal max-w-xl mx-auto">面对真实世界的灰色地带，你的选择是什么？</p>
@@ -223,12 +323,21 @@
   <!-- ============================================
        SECTION 5 — QUIZ
        ============================================ -->
-  <section id="quiz" class="py-32 px-6 bg-slate-50">
-    <div class="max-w-3xl mx-auto">
+  <section id="quiz" class="py-32 px-6 bg-slate-50 relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <div class="section-orb orb-quiz-1"></div>
+      <div class="section-dot-pattern"></div>
+      <span class="eng-deco ed-cert ed-ce1">✅ CERTIFIED</span>
+      <span class="eng-deco ed-cert ed-ce2">📋 PASS</span>
+      <span class="eng-deco ed-check ed-ch1"><span class="chk-box">☐</span> OWASP Top 10</span>
+      <span class="eng-deco ed-check ed-ch2"><span class="chk-box">☑</span> GDPR Compliance</span>
+      <span class="eng-deco ed-score">Score: <span class="score-val">85/100</span></span>
+    </div>
+    <div class="max-w-3xl mx-auto relative z-10">
 
       <div class="text-center mb-20 fade-up" data-fade>
         <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-xs font-semibold tracking-wide text-sky-700 mb-5">
-          Self Assessment
+          Self Assessment · <span data-count="50" data-suffix="道专业题目"></span>
         </span>
         <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900">素养测评</h2>
         <p class="text-slate-500 text-lg font-normal max-w-xl mx-auto">检验你的职业伦理知识储备</p>
@@ -252,8 +361,19 @@
   <!-- ============================================
        SECTION 6 — ROLE PLAY (Scenario Simulation)
        ============================================ -->
-  <section id="roleplay" class="py-32 px-6 bg-white">
-    <div class="max-w-4xl mx-auto">
+  <section id="roleplay" class="py-32 px-6 bg-white relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <div class="section-orb orb-rp-1"></div>
+      <div class="section-orb orb-rp-2"></div>
+      <div class="chat-deco ch-d1"><span></span></div>
+      <div class="chat-deco ch-d2"><span></span></div>
+      <div class="chat-deco ch-d3"><span></span></div>
+      <div class="section-grid-subtle"></div>
+      <span class="eng-deco ed-notif ed-n1">🔔 CTO 发来一条消息</span>
+      <span class="eng-deco ed-notif ed-n2">⏰ 紧急 — 立即响应</span>
+      <span class="eng-deco ed-endpoint">POST /api/v1/incident/report</span>
+    </div>
+    <div class="max-w-4xl mx-auto relative z-10">
 
       <div class="text-center mb-16 fade-up" data-fade>
         <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-xs font-semibold tracking-wide text-rose-700 mb-5">
@@ -299,12 +419,18 @@
 
           <!-- Chat header -->
           <div class="flex items-center justify-between px-5 py-3 bg-slate-100 border-b border-slate-200">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span id="roleplayTitle" class="text-xs text-slate-600 font-semibold tracking-wide">情景模拟中</span>
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span id="roleplayTitle" class="text-xs text-slate-600 font-semibold tracking-wide">情景模拟中</span>
+              </div>
+              <span class="text-slate-300">|</span>
+              <span id="rpRoundBadge" class="text-[10px] text-slate-500 font-medium bg-white/60 px-2 py-0.5 rounded-full border border-slate-200">回合 0/5</span>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="testEvalCard()" class="text-xs text-amber-500 hover:text-amber-600 transition-colors font-medium border border-amber-300 rounded-lg px-2 py-0.5">🔧测试卡片</button>
               <span class="text-[10px] text-slate-400 kbd-hint">Enter</span>
               <span class="text-[10px] text-slate-400">发送</span>
               <button onclick="resetRolePlay()" class="text-xs text-slate-400 hover:text-red-500 transition-colors font-medium ml-2">重置</button>
@@ -341,8 +467,23 @@
   <!-- ============================================
        SECTION 7 — AI Q&A
        ============================================ -->
-  <section id="qa" class="py-32 px-6 bg-slate-50">
-    <div class="max-w-3xl mx-auto">
+  <section id="qa" class="py-32 px-6 bg-slate-50 relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <div class="section-orb orb-qa-1"></div>
+      <span class="floating-qm fq-1">?</span>
+      <span class="floating-qm fq-2">?</span>
+      <span class="floating-qm fq-3">?</span>
+      <span class="floating-qm fq-4">💡</span>
+      <span class="floating-qm fq-5">🔒</span>
+      <span class="eng-deco ed-node ed-nd1"></span>
+      <span class="eng-deco ed-node ed-nd2"></span>
+      <span class="eng-deco ed-node ed-nd3"></span>
+      <span class="eng-deco ed-node-link ed-nl1"></span>
+      <span class="eng-deco ed-node-link ed-nl2"></span>
+      <span class="eng-deco ed-search">🔍 query: "data privacy" → 23 results</span>
+      <div class="section-wave-pattern"></div>
+    </div>
+    <div class="max-w-3xl mx-auto relative z-10">
 
       <div class="text-center mb-16 fade-up" data-fade>
         <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold tracking-wide text-blue-700 mb-5">
@@ -354,11 +495,11 @@
 
       <!-- Quick questions -->
       <div class="flex flex-wrap gap-2 mb-8 justify-center fade-up" data-fade id="quickQuestions">
-        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('收集用户数据时需要遵循哪些基本原则？')">数据收集原则</span>
-        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('什么是开源协议的传染性？GPL和MIT的区别？')">开源协议传染性</span>
-        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('发现同事代码里有安全漏洞，我该怎么处理？')">安全漏洞上报</span>
-        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('AI换脸技术涉及哪些法律风险？')">AI换脸法律风险</span>
-        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('程序员需要对代码造成的后果负法律责任吗？')">程序员法律责任</span>
+        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('老板让我默认勾选用户通讯录，这是行业惯例吗？我该怎么做？')">🤔 老板让我默认勾选通讯录</span>
+        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('GPL协议的『传染性』到底是什么？不小心用了会怎样？')">⚠️ GPL 传染性是什么</span>
+        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('同事代码里有后门，我举报了会不会毁了他的职业生涯？')">😰 同事代码有后门该举报吗</span>
+        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('AI换脸骗了那么多人，开发者需要负责吗？')">🎭 AI 换脸开发者有责任吗</span>
+        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('把公司代码拷回家加班，算不算违法？')">💻 拷代码回家加班违法吗</span>
       </div>
 
       <!-- Chat area -->
@@ -392,8 +533,20 @@
   <!-- ============================================
        FOOTER
        ============================================ -->
-  <footer class="py-20 px-6 border-t border-slate-100 bg-white">
-    <div class="max-w-5xl mx-auto text-center">
+  <footer class="py-20 px-6 border-t border-slate-100 bg-white relative overflow-hidden">
+    <!-- Wave divider -->
+    <div class="footer-wave">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="w-full h-full"><path d="M0,30 C240,0 480,60 720,30 C960,0 1200,60 1440,30 L1440,60 L0,60 Z" fill="currentColor" class="text-white dark:text-[#0F172A]"/><path d="M0,40 C320,20 640,50 960,35 C1120,25 1280,50 1440,40 L1440,60 L0,60 Z" fill="currentColor" class="text-emerald-500/10"/></svg>
+    </div>
+    <!-- Circuit board pattern -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden circuit-bg"></div>
+    <span class="eng-deco ed-route ed-r1">GET /api/v1/ethics</span>
+    <span class="eng-deco ed-route ed-r2">POST /api/v1/compliance</span>
+    <span class="eng-deco ed-deploy">🚀 deploy: production v2.4.1</span>
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <div class="section-orb orb-footer-1"></div>
+    </div>
+    <div class="max-w-5xl mx-auto text-center relative z-10">
 
       <div class="fade-up" data-fade>
         <h3 class="text-2xl font-bold mb-2 text-slate-900">代码之下</h3>
@@ -401,7 +554,7 @@
       </div>
 
       <!-- Team cards -->
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12 fade-up" data-fade id="teamGrid">
+      <div class="flex flex-wrap justify-center gap-4 mb-12 fade-up" data-fade id="teamGrid">
         <!-- Rendered by JS -->
       </div>
 
@@ -414,7 +567,7 @@
         <span class="text-xs px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-slate-500">Google Fonts</span>
       </div>
 
-      <p class="text-xs text-slate-400">&copy; 2025 代码之下 · 仅供教育演示用途</p>
+      <p class="text-xs text-slate-400">&copy; 2026 代码之下 · 仅供教育演示用途</p>
     </div>
   </footer>
 
@@ -422,6 +575,21 @@
   <button id="backToTop" class="fixed bottom-8 right-8 w-11 h-11 rounded-2xl bg-white border border-slate-200 shadow-lg shadow-slate-300/20 flex items-center justify-center text-slate-400 hover:text-emerald-500 hover:border-emerald-300 hover:shadow-emerald-500/10 transition-all duration-300 z-50 opacity-0 translate-y-4 pointer-events-none" aria-label="回到顶部">
     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5m0 0l-6 6m6-6l6 6"/></svg>
   </button>
+
+  <!-- Keyboard shortcut toast -->
+  <div id="shortcutToast" class="fixed bottom-24 right-8 z-40 max-w-xs bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-300/30 p-5 opacity-0 translate-y-4 pointer-events-none transition-all duration-500">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-sm font-bold text-slate-700">⌨️ 快捷键提示</span>
+      <button onclick="dismissShortcutToast()" class="text-slate-300 hover:text-slate-500 transition-colors">&times;</button>
+    </div>
+    <div class="space-y-1.5 text-xs text-slate-500">
+      <div class="flex items-center gap-2"><span class="kbd-hint text-[10px]">A</span><span class="kbd-hint text-[10px]">B</span><span class="kbd-hint text-[10px]">C</span> 实验选项</div>
+      <div class="flex items-center gap-2"><span class="kbd-hint text-[10px]">A-D</span><span>/</span><span class="kbd-hint text-[10px]">1-4</span> 答题</div>
+      <div class="flex items-center gap-2"><span class="kbd-hint text-[10px]">←</span><span class="kbd-hint text-[10px]">→</span> 翻案例 / 上一题</div>
+      <div class="flex items-center gap-2"><span class="kbd-hint text-[10px]">Esc</span> 关闭弹窗</div>
+      <div class="flex items-center gap-2"><span class="kbd-hint text-[10px]">?</span> 随时查看快捷键</div>
+    </div>
+  </div>
 
   <!-- Main JavaScript -->
   <script src="main.js"></script>

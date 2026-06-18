@@ -2,6 +2,27 @@
    《代码之下》自定义样式 & 动画 (教育平台风格)
    ============================================ */
 
+/* ----- 全局字体渲染优化 (LXGW WenKai) ----- */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+/* 霞鹜文楷在中文环境下偏细，加重正文字重 */
+body {
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+/* 标题使用稍重的字重 */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700 !important;
+  letter-spacing: -0.01em;
+}
+/* 小字使用中等字重以保证清晰 */
+.text-xs, span[class*="text-xs"], [class*="text-[10px]"] {
+  font-weight: 500 !important;
+}
+
 /* ----- Hero animated glow orbs (soft green + amber) ----- */
 @keyframes float-slow {
   0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
@@ -15,6 +36,29 @@
 }
 .orb-1 { animation: float-slow 14s ease-in-out infinite; }
 .orb-2 { animation: float-slow-reverse 16s ease-in-out infinite; }
+.orb-3 { animation: float-slow 20s ease-in-out infinite; animation-delay: -7s; }
+.orb-4 { animation: float-slow-reverse 18s ease-in-out infinite; animation-delay: -3s; }
+
+/* --- Hero floating particles --- */
+@keyframes particle-float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  20%      { opacity: 0.6; }
+  80%      { opacity: 0.6; }
+  100%     { transform: translate(var(--px), var(--py)) rotate(var(--rot)); opacity: 0; }
+}
+.hero-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(16,185,129,0.3);
+  pointer-events: none;
+}
+.hero-particle.p-1 { --px: 200px; --py: -300px; --rot: 180deg; top: 60%; left: 20%; animation: particle-float 12s ease-in-out infinite; }
+.hero-particle.p-2 { --px: -150px; --py: -200px; --rot: -90deg; top: 30%; left: 70%; background: rgba(245,158,11,0.3); animation: particle-float 15s ease-in-out infinite; animation-delay: -3s; }
+.hero-particle.p-3 { --px: 180px; --py: 250px; --rot: 45deg; top: 70%; left: 50%; background: rgba(14,165,233,0.3); animation: particle-float 10s ease-in-out infinite; animation-delay: -6s; }
+.hero-particle.p-4 { --px: -220px; --py: 100px; --rot: -135deg; top: 40%; left: 35%; background: rgba(139,92,246,0.3); animation: particle-float 14s ease-in-out infinite; animation-delay: -9s; }
+.hero-particle.p-5 { --px: 100px; --py: -150px; --rot: 270deg; top: 20%; left: 55%; background: rgba(244,63,94,0.25); animation: particle-float 16s ease-in-out infinite; animation-delay: -5s; }
 
 /* ----- Subtle grid pattern (light mode) ----- */
 .hero-grid {
@@ -24,12 +68,260 @@
   background-size: 64px 64px;
 }
 
+/* ----- Morphing SVG blob (hero) ----- */
+.morph-blob-container {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 700px;
+  height: 700px;
+  opacity: 0.7;
+}
+.morph-blob {
+  width: 100%;
+  height: 100%;
+}
+.morph-blob path {
+  transition: d 2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ----- Logo bounce easter egg ----- */
+@keyframes logo-bounce {
+  0%   { transform: scale(1) rotate(0deg); }
+  15%  { transform: scale(1.35) rotate(-8deg); }
+  28%  { transform: scale(0.9) rotate(6deg); }
+  42%  { transform: scale(1.2) rotate(-5deg); }
+  56%  { transform: scale(0.95) rotate(3deg); }
+  70%  { transform: scale(1.08) rotate(-1.5deg); }
+  84%  { transform: scale(0.98) rotate(0.5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* ----- Magnetic button ----- */
+.magnetic-btn {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ----- Wobble-in animation for section headings ----- */
+@keyframes wobble-in {
+  0%   { transform: scale(0.8) rotate(-2deg); opacity: 0; }
+  40%  { transform: scale(1.05) rotate(1deg); opacity: 1; }
+  70%  { transform: scale(0.97) rotate(-0.5deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ----- Proximity glow card ----- */
+.proximity-glow {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
 /* ----- Gradient text (emerald education style) ----- */
 .text-gradient-edu {
   background: linear-gradient(135deg, #059669 0%, #10B981 40%, #F59E0B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* ============================================
+   DECORATIVE BACKGROUNDS — 各板块背景装饰
+   ============================================ */
+
+/* --- Shared section orb base --- */
+.section-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.35;
+  animation: orb-drift 18s ease-in-out infinite;
+}
+@keyframes orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%      { transform: translate(30px, -25px) scale(1.12); }
+  50%      { transform: translate(-20px, 20px) scale(0.9); }
+  75%      { transform: translate(15px, 15px) scale(1.05); }
+}
+
+/* --- Knowledge orbs (emerald) --- */
+.orb-knowledge-1 {
+  top: -80px; right: -120px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(16,185,129,0.25), transparent);
+  animation-delay: 0s;
+}
+.orb-knowledge-2 {
+  bottom: -60px; left: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(52,211,153,0.2), transparent);
+  animation-delay: -8s;
+}
+
+/* --- Cases orbs (amber) --- */
+.orb-cases-1 {
+  top: 40%; right: -100px;
+  width: 450px; height: 450px;
+  background: radial-gradient(circle, rgba(245,158,11,0.18), transparent);
+  animation-delay: -4s;
+}
+
+/* --- Lab orbs (violet) --- */
+.orb-lab-1 {
+  top: -60px; left: -80px;
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(139,92,246,0.2), transparent);
+  animation-delay: -2s;
+}
+.orb-lab-2 {
+  bottom: -40px; right: -60px;
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(167,139,250,0.18), transparent);
+  animation-delay: -10s;
+}
+
+/* --- Quiz orbs (sky) --- */
+.orb-quiz-1 {
+  top: 30%; left: -120px;
+  width: 480px; height: 480px;
+  background: radial-gradient(circle, rgba(14,165,233,0.15), transparent);
+  animation-delay: -6s;
+}
+
+/* --- Roleplay orbs (rose) --- */
+.orb-rp-1 {
+  top: -70px; right: -90px;
+  width: 440px; height: 440px;
+  background: radial-gradient(circle, rgba(244,63,94,0.15), transparent);
+  animation-delay: -3s;
+}
+.orb-rp-2 {
+  bottom: -50px; left: -70px;
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(251,113,133,0.12), transparent);
+  animation-delay: -12s;
+}
+
+/* --- QA orbs (blue) --- */
+.orb-qa-1 {
+  top: 50%; right: -80px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(59,130,246,0.15), transparent);
+  animation-delay: -7s;
+}
+
+/* --- Footer orb (emerald warm) --- */
+.orb-footer-1 {
+  top: -100px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 300px;
+  background: radial-gradient(ellipse, rgba(16,185,129,0.12), transparent);
+  animation-delay: -5s;
+}
+
+/* --- Dot pattern texture (for white sections) --- */
+.section-dot-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(16,185,129,0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.6;
+}
+
+/* --- Subtle grid (for depth) --- */
+.section-grid-subtle {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(148,163,184,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148,163,184,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* --- Wave pattern (for grey sections) --- */
+.section-wave-pattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(148,163,184,0.03) 20px, rgba(148,163,184,0.03) 21px),
+    repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(148,163,184,0.03) 20px, rgba(148,163,184,0.03) 21px);
+  opacity: 0.5;
+}
+
+/* --- Section transition gradient overlays --- */
+#knowledge::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(16,185,129,0.06), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+#cases::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, rgba(245,158,11,0.05), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+#lab::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, rgba(139,92,246,0.05), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* --- Card inner glow on hover --- */
+.bento-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(16,185,129,0.06), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.bento-card:hover::after {
+  opacity: 1;
+}
+
+/* --- Lab terminal scanline effect --- */
+#labContent {
+  position: relative;
+}
+#labContent::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.008) 2px, rgba(0,0,0,0.008) 4px);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ============================================
+   DARK MODE — decorative backgrounds
+   ============================================ */
+html.dark .section-dot-pattern {
+  background-image: radial-gradient(rgba(16,185,129,0.06) 1px, transparent 1px);
+  opacity: 0.4;
+}
+html.dark .section-grid-subtle {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+}
+html.dark .section-wave-pattern {
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.02) 20px, rgba(255,255,255,0.02) 21px),
+    repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(255,255,255,0.02) 20px, rgba(255,255,255,0.02) 21px);
+}
+html.dark #labContent::after {
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.01) 2px, rgba(255,255,255,0.01) 4px);
 }
 
 /* Keep old gradient text class for backward compatibility with remaining dark sections */
@@ -70,12 +362,15 @@
               box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1),
               border-color 0.5s ease;
 }
-.bento-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 24px 48px -12px rgba(16, 185, 129, 0.15),
-              0 8px 24px -8px rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.25);
-}
+/* Per-card theme colors */
+.bento-card:nth-child(1) { background: linear-gradient(135deg, #ECFDF5, #F0FDF4) !important; border-color: rgba(16,185,129,0.15) !important; }
+.bento-card:nth-child(2) { background: linear-gradient(135deg, #F0F9FF, #F4F9FD) !important; border-color: rgba(14,165,233,0.15) !important; }
+.bento-card:nth-child(3) { background: linear-gradient(135deg, #FFFBEB, #FFFCF0) !important; border-color: rgba(245,158,11,0.15) !important; }
+.bento-card:nth-child(4) { background: linear-gradient(135deg, #F5F3FF, #FAF8FF) !important; border-color: rgba(139,92,246,0.15) !important; }
+.bento-card:nth-child(1):hover { border-color: rgba(16,185,129,0.4) !important; box-shadow: 0 24px 48px -12px rgba(16,185,129,0.18); }
+.bento-card:nth-child(2):hover { border-color: rgba(14,165,233,0.4) !important; box-shadow: 0 24px 48px -12px rgba(14,165,233,0.18); }
+.bento-card:nth-child(3):hover { border-color: rgba(245,158,11,0.4) !important; box-shadow: 0 24px 48px -12px rgba(245,158,11,0.18); }
+.bento-card:nth-child(4):hover { border-color: rgba(139,92,246,0.4) !important; box-shadow: 0 24px 48px -12px rgba(139,92,246,0.18); }
 
 /* ----- Modal enter animation ----- */
 @keyframes modal-in {
@@ -179,6 +474,12 @@ html.dark .bento-card:hover {
   border-color: rgba(56, 189, 248, 0.3) !important;
   box-shadow: 0 20px 60px -12px rgba(56, 189, 248, 0.15), 0 0 0 1px rgba(56, 189, 248, 0.1) inset !important;
 }
+/* Dark mode card backgrounds */
+html.dark .bento-card:nth-child(1) { background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02)) !important; }
+html.dark .bento-card:nth-child(2) { background: linear-gradient(135deg, rgba(14,165,233,0.06), rgba(14,165,233,0.02)) !important; }
+html.dark .bento-card:nth-child(3) { background: linear-gradient(135deg, rgba(245,158,11,0.06), rgba(245,158,11,0.02)) !important; }
+html.dark .bento-card:nth-child(4) { background: linear-gradient(135deg, rgba(139,92,246,0.06), rgba(139,92,246,0.02)) !important; }
+
 /* Dark mode card icon circles */
 html.dark .bento-card div[class*="bg-emerald-50"] { background-color: rgba(16, 185, 129, 0.12) !important; border-color: rgba(16, 185, 129, 0.2) !important; }
 html.dark .bento-card div[class*="bg-sky-50"]    { background-color: rgba(14, 165, 233, 0.12) !important; border-color: rgba(14, 165, 233, 0.2) !important; }
@@ -326,7 +627,7 @@ body, nav, section, footer, .bento-card, #quizContainer, #labContent {
 }
 
 /* ----- Button active press feedback ----- */
-button:active {
+button:active:not(.carousel-arrow) {
   transform: scale(0.96) !important;
   transition: transform 0.1s ease !important;
 }
@@ -416,10 +717,16 @@ html.dark .nav-link.active {
 .bento-card.expanded .edu-card-detail {
   grid-template-rows: 1fr;
 }
+.bento-card.expanded .detail-arrow {
+  transform: rotate(180deg);
+}
 /* Keep hover expand on desktop, use class for mobile */
 @media (hover: hover) {
   .bento-card:hover .edu-card-detail {
     grid-template-rows: 1fr;
+  }
+  .bento-card:hover .detail-arrow {
+    transform: rotate(180deg);
   }
 }
 
@@ -941,4 +1248,1337 @@ html.dark #roleplayEval .eval-card {
   background: #1E293B;
   border-color: #34D399;
   box-shadow: 0 8px 40px -8px rgba(52, 211, 153, 0.25);
+}
+
+/* ============================================
+   FONT SIZE ENHANCEMENTS — 全局字号放大（+25%，方便阅读）
+   ============================================ */
+
+/* --- 全局基础字号抬高 --- */
+html { font-size: 18px; }
+body { font-size: 1rem; line-height: 1.75; }
+
+/* --- 导航栏 --- */
+nav a[href^="#"] { font-size: 16px !important; }
+nav .text-base { font-size: 18px !important; }
+
+/* --- Hero --- */
+#hero h1 { font-size: clamp(3.5rem, 9vw, 9rem) !important; }
+#hero p { font-size: clamp(1.2rem, 2.2vw, 1.5rem) !important; }
+#hero .cta-text, #hero a[class*="text-sm"] { font-size: 16px !important; }
+
+/* --- 各 section 标题 --- */
+section[id] h2 { font-size: clamp(2.5rem, 5.5vw, 4rem) !important; }
+section[id] > div > div:first-child > p[class*="text-lg"] { font-size: 1.25rem !important; }
+section[id] > div > div:first-child > p[class*="max-w"] { font-size: 1.1rem !important; line-height: 1.8 !important; }
+
+/* --- 知识展厅卡片 --- */
+.bento-card h3 { font-size: 1.5rem !important; }
+.bento-card > p[class*="text-sm"] { font-size: 1.05rem !important; line-height: 1.75 !important; }
+.bento-card .edu-card-detail div[class*="text-slate-400"],
+.bento-card .edu-card-detail [class*="text-sm"] { font-size: 1rem !important; line-height: 1.8 !important; }
+
+/* --- 案例卡片 --- */
+#caseCarousel h3 { font-size: 1.25rem !important; }
+#caseCarousel p[class*="text-sm"] { font-size: 1rem !important; line-height: 1.7 !important; }
+#caseCarousel span[class*="text-\\[10px\\]"],
+#caseCarousel span[class*="tracking-widest"] { font-size: 12px !important; }
+
+/* --- 案例弹窗 --- */
+#caseModalContent h2 { font-size: 1.75rem !important; }
+#caseModalContent p, #caseModalContent div[class*="text-sm"] { font-size: 1.05rem !important; line-height: 1.8 !important; }
+#caseModalContent h4 { font-size: 12px !important; }
+
+/* --- 伦理实验室 --- */
+#labContent p[class*="text-sm"] { font-size: 1.05rem !important; line-height: 1.8 !important; }
+#labContent p[class*="text-base"], #labContent p[class*="leading-relaxed"] { font-size: 1.1rem !important; line-height: 1.85 !important; }
+#labContent p[class*="text-xs"] { font-size: 0.9rem !important; line-height: 1.65 !important; }
+#labContent button p[class*="text-sm"] { font-size: 1rem !important; }
+#labContent button p[class*="text-xs"] { font-size: 0.88rem !important; line-height: 1.6 !important; }
+#labContent span[class*="text-\\[10px\\]"] { font-size: 12px !important; }
+
+/* --- 测评 --- */
+#quizContainer h3 { font-size: 1.3rem !important; line-height: 1.75 !important; }
+#quizContainer p[class*="text-sm"],
+#quizContainer span[class*="text-sm"] { font-size: 1.05rem !important; line-height: 1.75 !important; }
+#quizContainer p[class*="text-xs"] { font-size: 0.88rem !important; }
+.quiz-review-item p { font-size: 0.9rem !important; line-height: 1.65 !important; }
+#quizContainer span[class*="text-slate-600"] { font-size: 1.05rem !important; }
+
+/* --- 情景模拟 --- */
+#roleplay .scenario-card h3 { font-size: 1.2rem !important; }
+#roleplay .scenario-card p[class*="text-xs"] { font-size: 0.9rem !important; line-height: 1.6 !important; }
+#roleplay .scenario-card span[class*="text-xs"] { font-size: 0.85rem !important; }
+.chat-bubble { font-size: 16px !important; line-height: 1.75 !important; }
+#roleplayInput, #qaInput { font-size: 16px !important; }
+#roleplayInput::placeholder, #qaInput::placeholder { font-size: 15px !important; }
+
+/* --- AI问答 --- */
+#qaMessages p[class*="text-sm"] { font-size: 1.05rem !important; }
+.quick-q { font-size: 0.9rem !important; padding: 0.65rem 1.2rem !important; }
+
+/* --- 评价卡片 --- */
+.eval-dim-name { font-size: 15px !important; }
+.eval-dim-score { font-size: 16px !important; }
+.eval-dim-comment { font-size: 14px !important; line-height: 1.6 !important; }
+.eval-overall-text { font-size: 16px !important; line-height: 1.8 !important; }
+.eval-grade-text { font-size: 24px !important; }
+.eval-restart-btn, .eval-retry-btn { font-size: 15px !important; }
+
+/* --- 页脚 --- */
+footer h3 { font-size: 1.5rem !important; }
+footer p[class*="text-sm"] { font-size: 1rem !important; }
+footer p[class*="text-xs"] { font-size: 0.85rem !important; }
+footer span[class*="text-xs"] { font-size: 12px !important; }
+#teamGrid p[class*="text-sm"] { font-size: 1rem !important; }
+#teamGrid p[class*="text-xs"] { font-size: 0.85rem !important; }
+
+/* --- 快捷提问标签 --- */
+#quickQuestions span { font-size: 0.92rem !important; }
+
+/* --- 通用按钮 --- */
+button[class*="text-sm"] { font-size: 15px !important; }
+a[class*="text-sm"] { font-size: 15px !important; }
+
+/* --- 新增：badge 标签 --- */
+span[class*="text-xs"] { font-size: 0.82rem !important; }
+section[id] span[class*="tracking-wide"][class*="text-xs"] { font-size: 0.8rem !important; }
+
+/* ============================================
+   MOBILE NAV DRAWER
+   ============================================ */
+
+/* Hamburger animation */
+.hamburger-line {
+  transform-origin: center;
+}
+#mobileMenuBtn.open .hamburger-line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+#mobileMenuBtn.open .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+#mobileMenuBtn.open .hamburger-line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Drawer open state */
+#mobileDrawer.open {
+  pointer-events: auto;
+}
+#mobileDrawer.open #mobileOverlay {
+  background: rgba(0,0,0,0.4);
+}
+#mobileDrawer.open #mobilePanel {
+  transform: translateX(0);
+}
+
+/* Mobile nav link active */
+.mobile-nav-link.active-mobile {
+  color: #059669 !important;
+  background: rgba(16,185,129,0.1) !important;
+}
+
+/* Dark mode mobile */
+html.dark #mobilePanel {
+  background-color: #1E293B !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+html.dark #mobilePanel > div:first-child {
+  border-color: rgba(255,255,255,0.06) !important;
+}
+html.dark #mobilePanel > div:first-child span { color: #CBD5E1 !important; }
+html.dark #mobilePanel > div:first-child button { color: #94A3B8 !important; }
+html.dark .mobile-nav-link { color: #94A3B8 !important; }
+html.dark .mobile-nav-link:hover { color: #6EE7B7 !important; background: rgba(16,185,129,0.08) !important; }
+html.dark .mobile-nav-link.active-mobile { color: #6EE7B7 !important; background: rgba(16,185,129,0.15) !important; }
+
+/* ============================================
+   CAROUSEL DOTS INDICATOR
+   ============================================ */
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #CBD5E1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.carousel-dot:hover {
+  background: #10B981;
+  transform: scale(1.5);
+}
+.carousel-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: #10B981;
+}
+html.dark .carousel-dot {
+  background: rgba(255,255,255,0.15);
+}
+html.dark .carousel-dot:hover,
+html.dark .carousel-dot.active {
+  background: #34D399;
+}
+
+/* ============================================
+   SECTION BACKGROUND TEXTURES — 每板块独立纹理
+   ============================================ */
+
+/* --- Knowledge: blueprint grid + large code watermark --- */
+#knowledge::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    /* Blueprint grid */
+    linear-gradient(rgba(16,185,129,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16,185,129,0.06) 1px, transparent 1px),
+    /* Corner crosshairs */
+    radial-gradient(circle at 40px 40px, rgba(16,185,129,0.15) 1px, transparent 1px),
+    radial-gradient(circle at calc(100% - 40px) 40px, rgba(16,185,129,0.15) 1px, transparent 1px),
+    radial-gradient(circle at 40px calc(100% - 40px), rgba(16,185,129,0.15) 1px, transparent 1px),
+    radial-gradient(circle at calc(100% - 40px) calc(100% - 40px), rgba(16,185,129,0.15) 1px, transparent 1px);
+  background-size: 32px 32px, 32px 32px, 80px 80px, 80px 80px, 80px 80px, 80px 80px;
+}
+
+/* --- Cases: caution diagonal stripes --- */
+#cases::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 20px,
+    rgba(245,158,11,0.04) 20px,
+    rgba(245,158,11,0.04) 22px
+  );
+}
+
+/* --- Lab: terminal editor backdrop --- */
+#lab::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    /* Line numbers column */
+    linear-gradient(90deg, rgba(139,92,246,0.04) 0px, rgba(139,92,246,0.04) 40px, transparent 40px),
+    /* Code lines */
+    repeating-linear-gradient(0deg, transparent, transparent 22px, rgba(139,92,246,0.03) 22px, rgba(139,92,246,0.03) 23px);
+}
+
+/* --- Quiz: answer sheet dots --- */
+#quiz::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(circle, rgba(14,165,233,0.08) 2px, transparent 2px);
+  background-size: 36px 36px;
+}
+
+/* --- Roleplay: chat bubble pattern --- */
+#roleplay::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 60px 20px at 20% 30%, rgba(244,63,94,0.05) 0%, transparent 100%),
+    radial-gradient(ellipse 50px 18px at 75% 60%, rgba(16,185,129,0.05) 0%, transparent 100%),
+    radial-gradient(ellipse 40px 15px at 50% 80%, rgba(244,63,94,0.04) 0%, transparent 100%);
+}
+
+/* --- QA: knowledge nodes --- */
+#qa::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(circle at 15% 25%, rgba(59,130,246,0.08) 0%, transparent 40%),
+    radial-gradient(circle at 75% 45%, rgba(59,130,246,0.06) 0%, transparent 40%),
+    radial-gradient(circle at 40% 70%, rgba(59,130,246,0.07) 0%, transparent 40%);
+}
+
+/* --- Footer: already has circuit-bg, add top gradient --- */
+footer::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 120px; pointer-events: none; z-index: 1;
+  background: linear-gradient(to bottom, rgba(16,185,129,0.06), transparent);
+}
+
+/* --- Hero: enhance with large code watermark --- */
+#hero::after {
+  content: '{ }';
+  position: absolute; bottom: 8%; right: 6%; pointer-events: none; z-index: 0;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: clamp(120px, 15vw, 280px);
+  font-weight: 900;
+  color: rgba(16,185,129,0.04);
+  line-height: 1;
+}
+
+/* ============================================
+   ENGINEER DECORATIVE ELEMENTS — 浮动点缀文字
+   ============================================ */
+
+.eng-deco {
+  position: absolute;
+  pointer-events: none;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+  opacity: 0.25;
+  white-space: nowrap;
+  z-index: 0;
+}
+
+/* --- Code brackets --- */
+.ed-bracket { font-size: 60px; font-weight: 900; color: #10B981; opacity: 0.22; }
+.ed-b1 { top: 12%; right: 6%; animation: orb-drift 22s ease-in-out infinite; }
+.ed-b2 { bottom: 18%; left: 4%; font-size: 40px; color: #8B5CF6; animation: orb-drift 20s ease-in-out infinite; animation-delay: -8s; }
+
+/* --- Terminal prompts --- */
+.ed-prompt { font-size: 12px; color: #64748B; }
+.ed-p1 { top: 22%; left: 3%; animation: orb-drift 16s ease-in-out infinite; }
+.ed-p2 { bottom: 30%; right: 5%; animation: orb-drift 18s ease-in-out infinite; animation-delay: -5s; }
+
+/* --- Hash / include --- */
+.ed-hash { font-size: 13px; color: #8B5CF6; font-style: italic; }
+.ed-h1 { top: 70%; right: 8%; animation: orb-drift 15s ease-in-out infinite; animation-delay: -3s; }
+
+/* --- Keycaps --- */
+.ed-keycap {
+  font-size: 11px; font-weight: 700; color: #475569;
+  background: rgba(148,163,184,0.2); border: 1px solid rgba(148,163,184,0.35);
+  padding: 3px 10px; border-radius: 5px; font-family: 'Inter', sans-serif;
+}
+.ed-k1 { top: 50%; right: 15%; animation: orb-drift 14s ease-in-out infinite; animation-delay: -7s; }
+.ed-k2 { bottom: 45%; left: 8%; animation: orb-drift 17s ease-in-out infinite; animation-delay: -2s; }
+
+/* --- Log lines (cases) --- */
+.ed-log { font-size: 11px; color: #EF4444; }
+.ed-l1 { top: 15%; left: 3%; animation: orb-drift 20s ease-in-out infinite; }
+.ed-l2 { bottom: 22%; right: 4%; color: #F59E0B; animation: orb-drift 16s ease-in-out infinite; animation-delay: -6s; }
+
+/* --- Diff view (cases) --- */
+.ed-diff { font-size: 11px; }
+.ed-d1 { top: 55%; left: 2%; }
+.ed-d2 { top: 59%; left: 2%; animation: orb-drift 14s ease-in-out infinite; }
+.diff-del { color: #EF4444; background: rgba(239,68,68,0.08); padding: 0 4px; border-radius: 2px; }
+.diff-add { color: #10B981; background: rgba(16,185,129,0.08); padding: 0 4px; border-radius: 2px; }
+
+/* --- Warning stripes (cases) --- */
+.ed-stripe {
+  top: 0; right: 8%; width: 40px; height: 200px;
+  background: repeating-linear-gradient(45deg, rgba(239,68,68,0.05), rgba(239,68,68,0.05) 6px, rgba(251,191,36,0.05) 6px, rgba(251,191,36,0.05) 12px);
+  border-radius: 4px; animation: orb-drift 25s ease-in-out infinite;
+}
+
+/* --- Terminal commands (lab) --- */
+.ed-term { font-size: 11px; color: #10B981; }
+.ed-t1 { top: 15%; left: 2%; animation: orb-drift 18s ease-in-out infinite; }
+.ed-t2 { top: 20%; left: 2%; color: #8B5CF6; animation: orb-drift 15s ease-in-out infinite; animation-delay: -4s; }
+
+/* --- Code snippet (lab) --- */
+.ed-code { font-size: 10px; line-height: 1.6; }
+.ed-c1 { top: 70%; right: 3%; color: #64748B; animation: orb-drift 12s ease-in-out infinite; }
+.ed-c2 { top: 73%; right: 3%; color: #64748B; animation: orb-drift 12s ease-in-out infinite; animation-delay: -1s; }
+.code-kw { color: #8B5CF6; }
+.code-fn { color: #3B82F6; }
+.code-str { color: #10B981; }
+.code-cmt { color: #94A3B8; font-style: italic; }
+
+/* --- Git SHA (lab) --- */
+.ed-sha { font-size: 10px; color: #F59E0B; bottom: 12%; right: 5%; animation: orb-drift 14s ease-in-out infinite; animation-delay: -6s; }
+
+/* --- Cert badges (quiz) --- */
+.ed-cert { font-size: 13px; font-weight: 800; letter-spacing: 2px; }
+.ed-ce1 { top: 12%; right: 5%; color: #10B981; animation: orb-drift 16s ease-in-out infinite; }
+.ed-ce2 { bottom: 18%; left: 4%; color: #3B82F6; animation: orb-drift 18s ease-in-out infinite; animation-delay: -8s; }
+
+/* --- Checklist (quiz) --- */
+.ed-check { font-size: 11px; color: #64748B; }
+.ed-ch1 { top: 60%; left: 3%; }
+.ed-ch2 { top: 64%; left: 3%; }
+.chk-box { margin-right: 4px; }
+
+/* --- Score (quiz) --- */
+.ed-score { font-size: 14px; font-weight: 700; bottom: 8%; right: 6%; color: #64748B; animation: orb-drift 15s ease-in-out infinite; }
+.score-val { color: #10B981; }
+
+/* --- Notification bubbles (roleplay) --- */
+.ed-notif { font-size: 11px; background: rgba(255,255,255,0.7); border: 1px solid rgba(148,163,184,0.2); padding: 4px 10px; border-radius: 12px; }
+.ed-n1 { top: 10%; right: 4%; animation: orb-drift 15s ease-in-out infinite; }
+.ed-n2 { top: 15%; right: 4%; color: #EF4444; background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.15); animation: orb-drift 13s ease-in-out infinite; animation-delay: -5s; }
+
+/* --- API endpoint (roleplay) --- */
+.ed-endpoint { font-size: 10px; color: #3B82F6; bottom: 10%; left: 3%; animation: orb-drift 16s ease-in-out infinite; animation-delay: -3s; }
+
+/* --- Neural network nodes (QA) --- */
+.ed-node {
+  width: 12px; height: 12px; border-radius: 50%; background: rgba(59,130,246,0.15);
+  border: 2px solid rgba(59,130,246,0.25);
+  animation: pulse-text 3s ease-in-out infinite;
+}
+.ed-nd1 { top: 25%; left: 8%; }
+.ed-nd2 { top: 45%; right: 6%; animation-delay: -1s; }
+.ed-nd3 { bottom: 30%; left: 12%; animation-delay: -2s; }
+
+/* --- Node links (QA) --- */
+.ed-node-link {
+  width: 80px; height: 1px;
+  background: linear-gradient(90deg, rgba(59,130,246,0.12), transparent);
+  transform-origin: left center;
+}
+.ed-nl1 { top: calc(25% + 6px); left: calc(8% + 12px); transform: rotate(15deg); }
+.ed-nl2 { top: calc(45% + 6px); left: calc(12% + 12px); transform: rotate(-20deg); width: 120px; }
+
+/* --- Search result (QA) --- */
+.ed-search { font-size: 10px; color: #64748B; bottom: 12%; right: 5%; animation: orb-drift 14s ease-in-out infinite; animation-delay: -7s; }
+
+/* --- API routes (footer) --- */
+.ed-route { font-size: 11px; color: #10B981; }
+.ed-r1 { top: 25%; left: 5%; animation: orb-drift 18s ease-in-out infinite; }
+.ed-r2 { top: 30%; left: 5%; color: #3B82F6; animation: orb-drift 16s ease-in-out infinite; animation-delay: -5s; }
+
+/* --- Deploy info (footer) --- */
+.ed-deploy { font-size: 10px; color: #F59E0B; bottom: 20%; right: 5%; animation: orb-drift 15s ease-in-out infinite; animation-delay: -3s; }
+
+/* --- Binary rain (hero) --- */
+.ed-binary { font-size: 14px; color: #10B981; letter-spacing: 3px; opacity: 0.2; }
+.ed-bi1 { top: 20%; left: 3%; animation: orb-drift 20s ease-in-out infinite; }
+.ed-bi2 { top: 50%; right: 4%; animation: orb-drift 22s ease-in-out infinite; animation-delay: -6s; }
+.ed-bi3 { bottom: 30%; left: 5%; animation: orb-drift 18s ease-in-out infinite; animation-delay: -10s; }
+
+/* --- Code tags (hero) --- */
+.ed-tag { font-size: 42px; font-weight: 900; color: #64748B; opacity: 0.18; }
+.ed-tg1 { top: 30%; left: 2%; animation: orb-drift 24s ease-in-out infinite; }
+.ed-tg2 { bottom: 25%; right: 3%; animation: orb-drift 20s ease-in-out infinite; animation-delay: -8s; }
+
+/* --- Python snippet (hero) --- */
+.ed-brace { font-size: 13px; color: #8B5CF6; top: 75%; right: 6%; animation: orb-drift 16s ease-in-out infinite; animation-delay: -4s; }
+
+/* --- Dark mode overrides --- */
+html.dark .ed-prompt, html.dark .ed-keycap, html.dark .ed-check, html.dark .ed-score { color: #94A3B8; }
+html.dark .ed-keycap { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+html.dark .ed-notif { background: rgba(30,41,59,0.7); border-color: rgba(255,255,255,0.08); }
+html.dark .ed-node { background: rgba(96,165,250,0.12); border-color: rgba(96,165,250,0.2); }
+html.dark .ed-node-link { background: linear-gradient(90deg, rgba(96,165,250,0.08), transparent); }
+html.dark .ed-binary { opacity: 0.18; }
+html.dark .ed-tag { opacity: 0.15; }
+html.dark .eng-deco { opacity: 0.22; }
+
+/* Dark mode texture adjustments */
+html.dark #knowledge::before {
+  background:
+    linear-gradient(rgba(16,185,129,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16,185,129,0.05) 1px, transparent 1px),
+    radial-gradient(circle at 40px 40px, rgba(16,185,129,0.12) 1px, transparent 1px),
+    radial-gradient(circle at calc(100% - 40px) 40px, rgba(16,185,129,0.12) 1px, transparent 1px),
+    radial-gradient(circle at 40px calc(100% - 40px), rgba(16,185,129,0.12) 1px, transparent 1px),
+    radial-gradient(circle at calc(100% - 40px) calc(100% - 40px), rgba(16,185,129,0.12) 1px, transparent 1px);
+  background-size: 32px 32px, 32px 32px, 80px 80px, 80px 80px, 80px 80px, 80px 80px;
+}
+html.dark #cases::before { background: repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(245,158,11,0.04) 20px, rgba(245,158,11,0.04) 22px); }
+html.dark #lab::before {
+  background:
+    linear-gradient(90deg, rgba(139,92,246,0.04) 0px, rgba(139,92,246,0.04) 40px, transparent 40px),
+    repeating-linear-gradient(0deg, transparent, transparent 22px, rgba(139,92,246,0.03) 22px, rgba(139,92,246,0.03) 23px);
+}
+html.dark #quiz::before { background: radial-gradient(circle, rgba(14,165,233,0.08) 2px, transparent 2px); background-size: 36px 36px; }
+html.dark #hero::after { color: rgba(16,185,129,0.05); }
+
+/* ============================================
+   KEYBOARD SHORTCUT TOAST
+   ============================================ */
+#shortcutToast.show {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
+}
+html.dark #shortcutToast {
+  background: #1E293B !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+}
+html.dark #shortcutToast span[class*="text-slate-700"] { color: #E2E8F0 !important; }
+html.dark #shortcutToast div[class*="text-slate-500"] { color: #94A3B8 !important; }
+
+/* ============================================
+   INTERACTIVE EFFECTS — 视觉与交互增强
+   ============================================ */
+
+/* ----- 3D Tilt on hover ----- */
+.tilt-card {
+  transform-style: preserve-3d;
+  perspective: 1200px;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); /* smooth return when JS clears */
+  will-change: transform;
+}
+.tilt-card:hover {
+  z-index: 5;
+}
+
+/* ----- Button ripple effect ----- */
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  transform: scale(0);
+  animation: ripple-anim 0.6s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes ripple-anim {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ----- Animated gradient border for cards ----- */
+@keyframes border-glow {
+  0%, 100% { border-color: rgba(16,185,129,0.3); box-shadow: 0 0 20px rgba(16,185,129,0.08); }
+  50%      { border-color: rgba(16,185,129,0.6); box-shadow: 0 0 30px rgba(16,185,129,0.15); }
+}
+.glow-border {
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+/* ----- Shimmer loading / hover shimmer ----- */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.shimmer-hover {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background-size: 200% 100%;
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+.shimmer-hover:hover::before {
+  transform: translateX(100%);
+}
+
+/* ----- Floating animation for cards (staggered) ----- */
+@keyframes card-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.float-card {
+  animation: card-float 5s ease-in-out infinite;
+}
+.float-card:nth-child(2) { animation-delay: -1.5s; }
+.float-card:nth-child(3) { animation-delay: -3s; }
+.float-card:nth-child(4) { animation-delay: -4.5s; }
+
+/* ----- Pulse ring for CTA buttons ----- */
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+  70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(16,185,129,0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+}
+.pulse-cta {
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+/* ----- Confetti canvas ----- */
+#confettiCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* ----- Hero subtitle typing / cycling ----- */
+.hero-subtitle-wrapper {
+  min-height: 2rem;
+}
+.hero-subtitle-cursor::after {
+  content: '|';
+  animation: blink 1s step-end infinite;
+  color: #10B981;
+  font-weight: 300;
+}
+
+/* ----- Count-up number animation ----- */
+.count-up {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- Emoji reaction burst ----- */
+@keyframes emoji-burst {
+  0%   { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 1; }
+  50%  { opacity: 1; }
+  100% { transform: translate(var(--ex), var(--ey)) scale(1.2) rotate(var(--er)); opacity: 0; }
+}
+.emoji-particle {
+  position: fixed;
+  font-size: 28px;
+  pointer-events: none;
+  z-index: 150;
+  animation: emoji-burst 1.2s ease-out forwards;
+}
+
+/* ----- Section entrance staggered children ----- */
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.stagger-children.visible > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(2) { transition-delay: 0.12s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(3) { transition-delay: 0.19s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(4) { transition-delay: 0.26s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(5) { transition-delay: 0.33s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(6) { transition-delay: 0.40s; opacity: 1; transform: translateY(0); }
+
+/* ----- Scale-on-hover for interactive cards ----- */
+.hover-lift {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 20px 40px -12px rgba(0,0,0,0.12), 0 0 0 1px rgba(16,185,129,0.1) !important;
+}
+
+/* ----- Spin icon on hover ----- */
+.icon-spin {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.group:hover .icon-spin,
+.icon-spin:hover {
+  transform: rotate(15deg) scale(1.15);
+}
+
+/* ----- Dark mode adjustments ----- */
+html.dark .shimmer-hover::before {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+html.dark .hover-lift:hover {
+  box-shadow: 0 20px 40px -12px rgba(0,0,0,0.3), 0 0 0 1px rgba(52,211,153,0.15) !important;
+}
+html.dark .ripple-effect {
+  background: rgba(255,255,255,0.15);
+}
+
+/* ============================================
+   ROLEPLAY CHAT ENHANCEMENTS
+   ============================================ */
+
+/* --- Chat decorative floating message shapes --- */
+@keyframes chat-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.06; }
+  50%      { transform: translateY(-30px) rotate(5deg); opacity: 0.12; }
+}
+.chat-deco {
+  position: absolute;
+  pointer-events: none;
+}
+.chat-deco span {
+  display: block;
+  border-radius: 18px;
+  background: rgba(16,185,129,0.12);
+}
+.ch-d1 { top: 20%; left: 5%; animation: chat-float 8s ease-in-out infinite; }
+.ch-d1 span { width: 120px; height: 40px; border-bottom-left-radius: 4px; }
+.ch-d2 { top: 55%; right: 8%; animation: chat-float 10s ease-in-out infinite; animation-delay: -3s; }
+.ch-d2 span { width: 90px; height: 50px; border-bottom-right-radius: 4px; background: rgba(244,63,94,0.08); }
+.ch-d3 { bottom: 25%; left: 12%; animation: chat-float 9s ease-in-out infinite; animation-delay: -6s; }
+.ch-d3 span { width: 100px; height: 35px; border-bottom-left-radius: 4px; background: rgba(139,92,246,0.08); }
+
+/* --- Pulsing online dot (animated ping) --- */
+@keyframes ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+/* --- Thinking wave animation (replaces dots) --- */
+@keyframes think-wave {
+  0%, 100% { height: 4px; }
+  50%      { height: 14px; }
+}
+.think-wave {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 18px;
+  padding: 2px 0;
+}
+.think-wave span {
+  display: block;
+  width: 3px;
+  background: #10B981;
+  border-radius: 2px;
+  animation: think-wave 1.2s ease-in-out infinite;
+}
+.think-wave span:nth-child(2) { animation-delay: 0.15s; }
+.think-wave span:nth-child(3) { animation-delay: 0.3s; }
+.think-wave span:nth-child(4) { animation-delay: 0.45s; }
+
+/* --- Chat avatar indicator --- */
+.chat-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.chat-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  animation: bubble-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.chat-row.user-row { flex-direction: row-reverse; }
+.chat-avatar.ai-avatar { background: #D1FAE5; }
+.chat-avatar.user-avatar { background: #D1FAE5; }
+
+/* --- Round badge pulse --- */
+#rpRoundBadge {
+  transition: all 0.3s ease;
+}
+#rpRoundBadge.warning {
+  background: #FEF3C7 !important;
+  border-color: #F59E0B !important;
+  color: #D97706 !important;
+}
+
+/* --- Scene image card --- */
+.scene-image-wrapper {
+  max-width: 480px;
+}
+.scene-image-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid rgba(16,185,129,0.2);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  background: #f8fafc;
+  transition: all 0.3s ease;
+  min-height: 200px;
+}
+.scene-image-card:hover {
+  border-color: rgba(16,185,129,0.4);
+  box-shadow: 0 8px 30px rgba(16,185,129,0.15);
+}
+.scene-img-final {
+  border-radius: 0 0 16px 16px;
+  animation: modal-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scene-img-final.expanded {
+  position: fixed !important;
+  top: 50% !important; left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-width: 85vw !important;
+  max-height: 85vh !important;
+  width: auto !important;
+  height: auto !important;
+  z-index: 200 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
+  cursor: zoom-out !important;
+}
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 85vw;
+  max-height: 85vh;
+  width: auto;
+  height: auto;
+  z-index: 200;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  cursor: zoom-out;
+}
+.scene-image.expanded::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: -1;
+}
+
+/* Dark mode scene images */
+html.dark .scene-image-card {
+  background: rgba(30,41,59,0.8);
+  border-color: rgba(52,211,153,0.2);
+}
+
+/* --- Dark mode chat --- */
+html.dark .chat-deco span { background: rgba(16,185,129,0.06); }
+html.dark .think-wave span { background: #34D399; }
+
+/* ============================================
+   AI Q&A ENHANCEMENTS
+   ============================================ */
+
+/* --- Floating question marks --- */
+@keyframes float-qm {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0.06; }
+  33%      { transform: translateY(-20px) rotate(10deg) scale(1.1); opacity: 0.12; }
+  66%      { transform: translateY(-10px) rotate(-5deg) scale(0.95); opacity: 0.08; }
+}
+.floating-qm {
+  position: absolute;
+  font-size: 40px;
+  font-weight: 900;
+  color: rgba(59,130,246,0.12);
+  pointer-events: none;
+  font-family: 'Inter', serif;
+}
+.fq-1 { top: 15%; left: 8%; animation: float-qm 9s ease-in-out infinite; font-size: 48px; }
+.fq-2 { top: 60%; right: 6%; animation: float-qm 11s ease-in-out infinite; animation-delay: -2s; font-size: 36px; }
+.fq-3 { bottom: 20%; left: 15%; animation: float-qm 10s ease-in-out infinite; animation-delay: -5s; font-size: 44px; }
+.fq-4 { top: 35%; right: 14%; animation: float-qm 12s ease-in-out infinite; animation-delay: -7s; font-size: 32px; }
+.fq-5 { top: 75%; left: 40%; animation: float-qm 8s ease-in-out infinite; animation-delay: -3s; font-size: 30px; }
+
+/* --- Quick question tag enhanced hover --- */
+.quick-q {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.quick-q::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(16,185,129,0.06));
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  border-radius: inherit;
+}
+.quick-q:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px -6px rgba(59,130,246,0.2);
+}
+.quick-q:hover::after { opacity: 1; }
+.quick-q:active { transform: scale(0.95); }
+
+/* --- AI thinking glow --- */
+.ai-thinking-glow {
+  position: relative;
+}
+.ai-thinking-glow::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 22px;
+  background: linear-gradient(90deg, #3B82F6, #10B981, #8B5CF6, #3B82F6);
+  background-size: 300% 100%;
+  animation: glow-sweep 2s linear infinite;
+  opacity: 0.3;
+  z-index: -1;
+}
+@keyframes glow-sweep {
+  0%   { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+
+/* --- Dark mode QA --- */
+html.dark .floating-qm { color: rgba(96,165,250,0.08); }
+
+/* ============================================
+   COMPREHENSIVE DARK MODE FIXES — 亮暗色模式完整适配
+   为 JS 动态渲染内容补充暗色模式样式，确保所有界面完整显示
+   ============================================ */
+
+/* ----- 案例弹窗 (Case Modal) — 完整暗色适配 ----- */
+html.dark #caseModalContent h2[class*="text-slate-900"] { color: #F1F5F9 !important; }
+html.dark #caseModalContent span[class*="bg-amber-50"] { background-color: rgba(245, 158, 11, 0.1) !important; border-color: rgba(245, 158, 11, 0.2) !important; }
+html.dark #caseModalContent span[class*="text-amber-600"] { color: #FBBF24 !important; }
+html.dark #caseModalContent div[class*="border-slate-100"] { border-color: rgba(255, 255, 255, 0.06) !important; }
+html.dark #caseModalContent h4[class*="text-red-500"] { color: #F87171 !important; }
+html.dark #caseModalContent h4[class*="text-amber-600"] { color: #FBBF24 !important; }
+html.dark #caseModalContent h4[class*="text-emerald-600"] { color: #34D399 !important; }
+html.dark #caseModalContent h4[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #caseModalContent div[class*="border-red-100"] { border-color: rgba(239, 68, 68, 0.15) !important; }
+html.dark #caseModalContent div[class*="border-amber-100"] { border-color: rgba(245, 158, 11, 0.15) !important; }
+html.dark #caseModalContent div[class*="border-emerald-100"] { border-color: rgba(16, 185, 129, 0.15) !important; }
+html.dark #caseModalContent div[class*="bg-red-50"] { background-color: rgba(239, 68, 68, 0.08) !important; }
+html.dark #caseModalContent div[class*="bg-amber-50"] { background-color: rgba(245, 158, 11, 0.08) !important; }
+html.dark #caseModalContent div[class*="bg-emerald-50"] { background-color: rgba(16, 185, 129, 0.08) !important; }
+html.dark #caseModalContent p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #caseModalContent p[class*="text-slate-400"] { color: #64748B !important; }
+html.dark #caseModalContent button[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #caseModalContent button[class*="bg-slate-50"]:hover { background-color: rgba(255, 255, 255, 0.06) !important; }
+html.dark #caseModalContent button[class*="hover:bg-emerald-50"]:hover { background-color: rgba(16, 185, 129, 0.08) !important; color: #6EE7B7 !important; }
+html.dark #caseModalContent button[class*="hover:bg-amber-50"]:hover { background-color: rgba(245, 158, 11, 0.08) !important; color: #FBBF24 !important; }
+html.dark #caseModalContent button[class*="border-slate-200"] { border-color: rgba(255, 255, 255, 0.1) !important; color: #94A3B8 !important; }
+html.dark #caseModalContent button[class*="border-slate-200"]:hover { border-color: rgba(255, 255, 255, 0.2) !important; background-color: rgba(255, 255, 255, 0.05) !important; color: #CBD5E1 !important; }
+html.dark #caseModalContent button[class*="bg-white"] { background-color: rgba(255, 255, 255, 0.04) !important; }
+
+/* ----- 伦理实验室 (Lab) — 完整暗色适配 ----- */
+/* 入口页暗色 */
+html.dark #labContent p[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark #labContent p[class*="text-slate-700"] { color: #CBD5E1 !important; }
+html.dark #labContent p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #labContent p[class*="text-slate-400"] { color: #64748B !important; }
+html.dark #labContent span[class*="text-slate-400"] { color: #64748B !important; }
+html.dark #labContent span[class*="text-slate-300"] { color: #64748B !important; }
+html.dark #labContent span[class*="text-violet-600"] { color: #A78BFA !important; }
+html.dark #labContent span[class*="bg-violet-50"] { background-color: rgba(139, 92, 246, 0.1) !important; border-color: rgba(139, 92, 246, 0.15) !important; }
+html.dark #labContent span[class*="text-emerald-600"] { color: #34D399 !important; }
+html.dark #labContent span[class*="bg-emerald-50"] { background-color: rgba(16, 185, 129, 0.1) !important; border-color: rgba(16, 185, 129, 0.2) !important; }
+html.dark #labContent span[class*="text-red-500"] { color: #F87171 !important; }
+html.dark #labContent span[class*="bg-red-50"] { background-color: rgba(239, 68, 68, 0.1) !important; border-color: rgba(239, 68, 68, 0.15) !important; }
+/* 实验室选项按钮 */
+html.dark #labContent button[class*="border-slate-200"] { border-color: rgba(255, 255, 255, 0.08) !important; }
+html.dark #labContent button[class*="bg-slate-50"] { background-color: rgba(255, 255, 255, 0.04) !important; }
+html.dark #labContent button[class*="bg-white"] { background-color: rgba(255, 255, 255, 0.05) !important; color: #CBD5E1 !important; border-color: rgba(255, 255, 255, 0.1) !important; }
+html.dark #labContent button[class*="bg-white"]:hover { border-color: rgba(139, 92, 246, 0.3) !important; color: #A78BFA !important; }
+html.dark #labContent button[class*="text-slate-600"] { color: #CBD5E1 !important; }
+/* 实验室分隔线和微交互 */
+html.dark #labContent div[class*="border-slate-100"] { border-color: rgba(255, 255, 255, 0.06) !important; }
+html.dark #labContent button[class*="bg-rose-50"] { background-color: rgba(244, 63, 94, 0.08) !important; border-color: rgba(244, 63, 94, 0.15) !important; }
+html.dark #labContent button[class*="text-rose-600"] { color: #FDA4AF !important; }
+html.dark #labContent button[class*="bg-rose-50"]:hover { background-color: rgba(244, 63, 94, 0.12) !important; border-color: rgba(244, 63, 94, 0.25) !important; }
+/* 实验室选项字母圈 */
+html.dark #labContent span[class*="bg-white"][class*="border-slate-200"] { background-color: rgba(255, 255, 255, 0.06) !important; border-color: rgba(255, 255, 255, 0.1) !important; color: #A78BFA !important; }
+html.dark #labContent button[class*="bg-slate-50"]:hover { border-color: rgba(139, 92, 246, 0.3) !important; background-color: rgba(139, 92, 246, 0.08) !important; }
+html.dark #labContent button[class*="bg-slate-50"] p[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark #labContent button[class*="bg-slate-50"] p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #labContent .text-violet-300 { color: #7C3AED !important; opacity: 0.6; }
+
+/* ----- 测评区 (Quiz) — 完整暗色适配 ----- */
+html.dark #quizContainer h3[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark #quizContainer p[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark #quizContainer p[class*="text-slate-700"] { color: #CBD5E1 !important; }
+html.dark #quizContainer p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #quizContainer p[class*="text-slate-400"] { color: #64748B !important; }
+html.dark #quizContainer span[class*="text-slate-600"] { color: #CBD5E1 !important; }
+html.dark #quizContainer span[class*="text-slate-400"] { color: #64748B !important; }
+html.dark #quizContainer span[class*="text-slate-300"] { color: #64748B !important; }
+/* 测评选项按钮 */
+html.dark #quizContainer button[class*="bg-slate-50"] {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html.dark #quizContainer button[class*="bg-slate-50"]:hover {
+  border-color: rgba(14, 165, 233, 0.3) !important;
+  background-color: rgba(14, 165, 233, 0.08) !important;
+}
+html.dark #quizContainer span[class*="bg-white"] {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+/* 测评结果页 */
+html.dark #quizContainer div[class*="bg-emerald-50"] { background-color: rgba(16, 185, 129, 0.08) !important; border-color: rgba(16, 185, 129, 0.15) !important; }
+html.dark #quizContainer span[class*="bg-emerald-50"] { background-color: rgba(16, 185, 129, 0.1) !important; border-color: rgba(16, 185, 129, 0.2) !important; }
+html.dark #quizContainer span[class*="text-emerald-600"] { color: #34D399 !important; }
+html.dark #quizContainer div[class*="bg-red-50"] { background-color: rgba(239, 68, 68, 0.08) !important; border-color: rgba(239, 68, 68, 0.15) !important; }
+html.dark #quizContainer p[class*="text-emerald-600"] { color: #34D399 !important; }
+html.dark #quizContainer p[class*="text-red-500"] { color: #F87171 !important; }
+html.dark #quizContainer p[class*="text-sky-500"] { color: #7DD3FC !important; }
+html.dark #quizContainer p[class*="text-amber-500"] { color: #FBBF24 !important; }
+/* 测评复查条目 */
+html.dark #quizContainer div[class*="border-emerald-100"] { border-color: rgba(16, 185, 129, 0.2) !important; }
+html.dark #quizContainer div[class*="border-red-100"] { border-color: rgba(239, 68, 68, 0.2) !important; }
+/* 分享卡片按钮 */
+html.dark #quizContainer button[class*="border-emerald-300"] { border-color: rgba(52, 211, 153, 0.3) !important; background-color: rgba(16, 185, 129, 0.08) !important; color: #34D399 !important; }
+html.dark #quizContainer button[class*="border-emerald-300"]:hover { border-color: rgba(52, 211, 153, 0.5) !important; background-color: rgba(16, 185, 129, 0.15) !important; }
+/* 测评进度点 */
+html.dark #quizProgress span[class*="bg-slate-200"] { background-color: rgba(255, 255, 255, 0.1) !important; }
+
+/* ----- 团队卡片 (Team Cards) — 暗色适配 ----- */
+html.dark footer div[id="teamGrid"] > div {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+html.dark footer div[id="teamGrid"] > div p[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark footer div[id="teamGrid"] > div p[class*="text-emerald-600"] { color: #6EE7B7 !important; }
+html.dark footer div[id="teamGrid"] > div p[class*="text-slate-400"] { color: #64748B !important; }
+html.dark footer div[id="teamGrid"] > div:hover { border-color: rgba(16, 185, 129, 0.3) !important; }
+html.dark footer div[id="teamGrid"] > div:hover p[class*="text-emerald"] { color: #34D399 !important; }
+
+/* ----- 知识卡片 (Knowledge Cards) — 补充暗色适配 ----- */
+html.dark .bento-card div[class*="text-slate-400"] { color: #64748B !important; }
+html.dark .bento-card div[class*="border-t"] { border-color: rgba(255, 255, 255, 0.06) !important; }
+
+/* ----- QA 区 (AI Q&A) — 补充暗色适配 ----- */
+html.dark #qaMessages svg[class*="text-slate-300"] { color: #475569 !important; }
+html.dark #qaMessages p[class*="text-slate-400"] { color: #64748B !important; }
+html.dark #qa input::placeholder { color: #64748B !important; }
+html.dark #qa > div > div > div:first-child:not([class*="bg-slate"]) {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(16px);
+}
+
+/* ----- 情景模拟 (Roleplay) — 补充暗色适配 ----- */
+html.dark #roleplay .scenario-card p[class*="text-slate-800"] { color: #E2E8F0 !important; }
+html.dark #roleplay .scenario-card p[class*="text-slate-500"] { color: #94A3B8 !important; }
+html.dark #roleplay .scenario-card span[class*="text-rose-500"] { color: #FDA4AF !important; }
+html.dark #roleplay .scenario-card span[class*="text-amber-500"] { color: #FBBF24 !important; }
+html.dark #roleplay .scenario-card span[class*="text-violet-500"] { color: #A78BFA !important; }
+html.dark #roleplay div[class*="bg-red-50"] { background-color: rgba(239, 68, 68, 0.1) !important; border-color: rgba(239, 68, 68, 0.2) !important; }
+html.dark #roleplay div[class*="bg-amber-50"] { background-color: rgba(245, 158, 11, 0.1) !important; border-color: rgba(245, 158, 11, 0.2) !important; }
+html.dark #roleplay div[class*="bg-violet-50"] { background-color: rgba(139, 92, 246, 0.1) !important; border-color: rgba(139, 92, 246, 0.2) !important; }
+html.dark #roleplay div[class*="text-red-500"] { color: #F87171 !important; }
+html.dark #roleplay div[class*="text-amber-500"] { color: #FBBF24 !important; }
+html.dark #roleplay div[class*="text-violet-500"] { color: #A78BFA !important; }
+html.dark #roleplayEval > div[class*="bg-white"] {
+  background-color: #1E293B !important;
+  border-color: #34D399 !important;
+  box-shadow: 0 8px 40px -8px rgba(52, 211, 153, 0.25) !important;
+}
+
+/* ----- 聊天区域 — 错误/提示信息暗色适配 ----- */
+html.dark .chat-bubble.ai code {
+  background: rgba(255, 255, 255, 0.1);
+  color: #CBD5E1;
+}
+html.dark .chat-bubble.ai pre {
+  background: #0F172A;
+  color: #CBD5E1;
+}
+/* 角色扮演输入框暗色 */
+html.dark #roleplayChat input { background-color: rgba(15, 23, 42, 0.6) !important; border-color: rgba(255, 255, 255, 0.08) !important; color: #E2E8F0 !important; }
+html.dark #roleplayChat input::placeholder { color: #64748B !important; }
+
+/* ----- 回到顶部按钮 — 暗色适配 ----- */
+html.dark #backToTop {
+  background-color: rgba(30, 41, 59, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #94A3B8 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+html.dark #backToTop:hover {
+  color: #34D399 !important;
+  border-color: rgba(52, 211, 153, 0.4) !important;
+  box-shadow: 0 4px 20px rgba(52, 211, 153, 0.15) !important;
+}
+
+/* ----- Hero 滚动指示箭头 — 暗色适配 ----- */
+html.dark .bounce-arrow svg { color: #475569 !important; }
+
+/* ----- 轮播卡片悬停暗色 ----- */
+html.dark #caseCarousel > div:hover { border-color: rgba(56, 189, 248, 0.3) !important; }
+
+/* ----- 轮播指示器文字暗色 ----- */
+html.dark #carouselCounter { color: #34D399 !important; }
+
+/* ----- 案例弹窗计数器 — 暗色适配 ----- */
+html.dark #caseModalContent div[class*="text-[10px]"][class*="text-slate-400"] { color: #64748B !important; }
+
+/* ----- 标签 (badge) 通用暗色适配 ----- */
+html.dark span[class*="bg-amber-50"][class*="text-amber"] { color: #FBBF24 !important; }
+html.dark span[class*="bg-sky-50"][class*="text-sky"] { color: #7DD3FC !important; }
+html.dark span[class*="bg-rose-50"][class*="text-rose"] { color: #FDA4AF !important; }
+html.dark span[class*="bg-blue-50"][class*="text-blue"] { color: #93C5FD !important; }
+html.dark span[class*="bg-violet-50"][class*="text-violet"] { color: #A78BFA !important; }
+
+/* ----- QA 快速提问标签 — 暗色增强 ----- */
+html.dark #quickQuestions span[class*="text-slate-600"] { color: #94A3B8 !important; }
+
+/* ----- 聊天头像 — 暗色适配 ----- */
+html.dark .chat-avatar.ai-avatar { background: rgba(16, 185, 129, 0.15); }
+html.dark .chat-avatar.user-avatar { background: rgba(16, 185, 129, 0.15); }
+
+/* ----- Hero 副标题光标 — 暗色适配 ----- */
+html.dark .hero-subtitle-cursor::after { color: #34D399; }
+
+/* ----- 轮播卡片暗色补充 ----- */
+html.dark #caseCarousel h3[class*="text-slate-900"] { color: #F1F5F9 !important; }
+html.dark #caseCarousel span[class*="text-amber-600"] { color: #FBBF24 !important; }
+html.dark #caseCarousel div[class*="bg-amber-50"] { background-color: rgba(245, 158, 11, 0.12) !important; border-color: rgba(245, 158, 11, 0.2) !important; }
+
+/* ----- 进度条暗色微调 ----- */
+html.dark #scrollProgress { box-shadow: 0 0 8px rgba(52, 211, 153, 0.3) !important; }
+
+/* ============================================
+   FOOTER ENHANCEMENTS
+   ============================================ */
+
+/* --- Wave divider --- */
+.footer-wave {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  overflow: hidden;
+  line-height: 0;
+}
+.footer-wave svg {
+  display: block;
+}
+
+/* --- Circuit board pattern --- */
+.circuit-bg {
+  background-image:
+    /* horizontal traces */
+    linear-gradient(90deg, transparent 49.5%, rgba(16,185,129,0.04) 49.5%, rgba(16,185,129,0.04) 50.5%, transparent 50.5%),
+    /* vertical traces */
+    linear-gradient(0deg, transparent 49.5%, rgba(16,185,129,0.04) 49.5%, rgba(16,185,129,0.04) 50.5%, transparent 50.5%),
+    /* nodes */
+    radial-gradient(circle at 25% 30%, rgba(16,185,129,0.08) 2px, transparent 2px),
+    radial-gradient(circle at 60% 55%, rgba(16,185,129,0.08) 2px, transparent 2px),
+    radial-gradient(circle at 80% 20%, rgba(16,185,129,0.08) 2px, transparent 2px),
+    radial-gradient(circle at 40% 70%, rgba(16,185,129,0.08) 2px, transparent 2px),
+    radial-gradient(circle at 15% 80%, rgba(16,185,129,0.08) 2px, transparent 2px),
+    radial-gradient(circle at 70% 75%, rgba(16,185,129,0.08) 2px, transparent 2px);
+  background-size: 80px 80px, 80px 80px, 160px 160px, 200px 200px, 180px 180px, 220px 220px, 170px 170px, 190px 190px;
+  opacity: 0.6;
+}
+
+/* --- Tech tag animation --- */
+footer span[class*="bg-slate-100"] {
+  transition: all 0.35s ease;
+  cursor: default;
+}
+footer span[class*="bg-slate-100"]:hover {
+  background: rgba(16,185,129,0.1) !important;
+  color: #10B981 !important;
+  border-color: rgba(16,185,129,0.25) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(16,185,129,0.12);
+}
+
+/* --- Team card enhanced --- */
+#teamGrid > div {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+#teamGrid > div:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 32px -8px rgba(16,185,129,0.15) !important;
+  border-color: rgba(16,185,129,0.3) !important;
+}
+#teamGrid > div:hover p[class*="text-emerald"] {
+  color: #059669 !important;
+}
+
+/* --- Dark mode footer --- */
+html.dark .circuit-bg {
+  background-image:
+    linear-gradient(90deg, transparent 49.5%, rgba(16,185,129,0.04) 49.5%, rgba(16,185,129,0.04) 50.5%, transparent 50.5%),
+    linear-gradient(0deg, transparent 49.5%, rgba(16,185,129,0.04) 49.5%, rgba(16,185,129,0.04) 50.5%, transparent 50.5%),
+    radial-gradient(circle at 25% 30%, rgba(52,211,153,0.06) 2px, transparent 2px),
+    radial-gradient(circle at 60% 55%, rgba(52,211,153,0.06) 2px, transparent 2px),
+    radial-gradient(circle at 80% 20%, rgba(52,211,153,0.06) 2px, transparent 2px),
+    radial-gradient(circle at 40% 70%, rgba(52,211,153,0.06) 2px, transparent 2px),
+    radial-gradient(circle at 15% 80%, rgba(52,211,153,0.06) 2px, transparent 2px),
+    radial-gradient(circle at 70% 75%, rgba(52,211,153,0.06) 2px, transparent 2px);
+  background-size: 80px 80px, 80px 80px, 160px 160px, 200px 200px, 180px 180px, 220px 220px, 170px 170px, 190px 190px;
+  opacity: 0.3;
+}
+
+/* ============================================
+   REACT BITS INSPIRED — 动效增强
+   借鉴 React Bits 的核心动画效果，纯 CSS + Vanilla JS 实现
+   ============================================ */
+
+/* ----- 1. Blob Cursor — 跟随鼠标的液态渐变球体 ----- */
+#blobCursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center,
+    rgba(16, 185, 129, 0.15) 0%,
+    rgba(52, 211, 153, 0.10) 25%,
+    rgba(139, 92, 246, 0.06) 50%,
+    rgba(59, 130, 246, 0.04) 75%,
+    transparent 100%
+  );
+  filter: blur(40px);
+  transform: translate(-50%, -50%);
+  will-change: left, top;
+  opacity: 0.7;
+}
+/* 在 hero 区域增强可见度 */
+#hero #blobCursor,
+#hero ~ * #blobCursor {
+  background: radial-gradient(circle at center,
+    rgba(16, 185, 129, 0.20) 0%,
+    rgba(245, 158, 11, 0.12) 30%,
+    rgba(139, 92, 246, 0.08) 60%,
+    transparent 100%
+  );
+}
+/* 暗色模式适配 */
+html.dark #blobCursor {
+  background: radial-gradient(circle at center,
+    rgba(52, 211, 153, 0.2) 0%,
+    rgba(56, 189, 248, 0.12) 30%,
+    rgba(167, 139, 250, 0.08) 60%,
+    transparent 100%
+  );
+  opacity: 0.5;
+}
+
+/* ----- 2. Shiny Text — 标题流光扫过效果 ----- */
+@keyframes shiny-sweep {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.shiny-text {
+  background: linear-gradient(
+    110deg,
+    #059669 0%,
+    #10B981 20%,
+    #F59E0B 40%,
+    #ffffff 50%,
+    #F59E0B 60%,
+    #10B981 80%,
+    #059669 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shiny-sweep 3.5s ease-in-out infinite;
+}
+/* 暗色模式 */
+html.dark .shiny-text {
+  background: linear-gradient(
+    110deg,
+    #34D399 0%,
+    #6EE7B7 20%,
+    #FBBF24 40%,
+    #F1F5F9 50%,
+    #FBBF24 60%,
+    #6EE7B7 80%,
+    #34D399 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shiny-sweep 3.5s ease-in-out infinite;
+}
+
+/* ----- 3. Floating Orbs — 页面背景飘浮光球 ----- */
+@keyframes float-orb-bg {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%      { transform: translate(60px, -40px) scale(1.15); }
+  50%      { transform: translate(-30px, 30px) scale(0.88); }
+  75%      { transform: translate(20px, 20px) scale(1.08); }
+}
+.bg-floating-orb {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.25;
+}
+.bg-floating-orb.orb-a {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(16,185,129,0.18), transparent);
+  top: 15%; left: 5%;
+  animation: float-orb-bg 18s ease-in-out infinite;
+}
+.bg-floating-orb.orb-b {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(139,92,246,0.12), transparent);
+  top: 55%; right: 8%;
+  animation: float-orb-bg 22s ease-in-out infinite;
+  animation-delay: -7s;
+}
+.bg-floating-orb.orb-c {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(245,158,11,0.10), transparent);
+  bottom: 10%; left: 25%;
+  animation: float-orb-bg 20s ease-in-out infinite;
+  animation-delay: -12s;
+}
+html.dark .bg-floating-orb.orb-a { background: radial-gradient(circle, rgba(52,211,153,0.12), transparent); opacity: 0.15; }
+html.dark .bg-floating-orb.orb-b { background: radial-gradient(circle, rgba(167,139,250,0.08), transparent); opacity: 0.12; }
+html.dark .bg-floating-orb.orb-c { background: radial-gradient(circle, rgba(251,191,36,0.06), transparent); opacity: 0.10; }
+
+/* ----- 4. Card Float — 卡片悬浮呼吸动画 ----- */
+@keyframes card-breathe {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.breathe-card {
+  animation: card-breathe 5s ease-in-out infinite;
+}
+.breathe-card:nth-child(2) { animation-delay: -1.5s; }
+.breathe-card:nth-child(3) { animation-delay: -3s; }
+.breathe-card:nth-child(4) { animation-delay: -4.5s; }
+
+/* ----- 5. Glow Pulse — 按钮光晕脉冲 ----- */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.3); }
+  50%      { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+}
+.glow-pulse-btn {
+  animation: glow-pulse 2.5s ease-out infinite;
+}
+
+/* ----- 6. Scale Entrance — 元素弹入动画 ----- */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.scale-in {
+  animation: scale-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.scale-in-delay-1 { animation-delay: 0.08s; opacity: 0; }
+.scale-in-delay-2 { animation-delay: 0.16s; opacity: 0; }
+.scale-in-delay-3 { animation-delay: 0.24s; opacity: 0; }
+.scale-in-delay-4 { animation-delay: 0.32s; opacity: 0; }
+
+/* ----- 7. Hover Lift — 悬停浮起效果 ----- */
+.hover-lift-enhanced {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-lift-enhanced:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 24px 48px -12px rgba(16, 185, 129, 0.18);
+}
+
+/* ----- 8. Ripple Effect — 点击波纹 ----- */
+@keyframes ripple-spread {
+  to { transform: scale(6); opacity: 0; }
+}
+.ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.25);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  animation: ripple-spread 0.7s ease-out forwards;
+}
+
+/* ----- 9. Border Glow Sweep — 卡片边框流光 ----- */
+@keyframes border-sweep {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.border-glow-card {
+  position: relative;
+}
+.border-glow-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, #10B981, #8B5CF6, #F59E0B, #10B981);
+  background-size: 300% 300%;
+  animation: border-sweep 4s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.border-glow-card:hover::before {
+  opacity: 1;
 }

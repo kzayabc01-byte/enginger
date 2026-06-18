@@ -1,5 +1,9 @@
 {
-    "api_key": "sk-your-deepseek-api-key-here",
+    "api_key": "your-deepseek-api-key",
     "model": "deepseek-chat",
-    "base_url": "https://api.deepseek.com"
+    "base_url": "https://api.deepseek.com",
+    "img_provider": "agnes",
+    "img_api_key": "your-agnes-api-key",
+    "img_model": "agnes-image-2.1-flash",
+    "img_base_url": "https://apihub.agnes-ai.com"
 }

@@ -178,10 +178,44 @@ def roleplay():
     scenario = data.get('scenario', 'data-breach')
     user_message = data.get('message', '')
     session_id = data.get('session_id', '')
+    custom_context = data.get('custom_context', '')
 
     if not session_id or session_id not in sessions:
         session_id = str(uuid.uuid4())
-        system_prompt = ROLEPLAY_SYSTEM_PROMPTS.get(scenario, ROLEPLAY_SYSTEM_PROMPTS['data-breach'])
+        if custom_context:
+            # Lab-bridge: build custom system prompt from the lab scenario context
+            system_prompt = f'''你是一个情景模拟游戏的游戏主持人(GM)。当前场景基于以下真实伦理困境。
+
+背景：
+{custom_context}
+
+游戏规则：
+- 模拟共进行 6~8 轮对话，你需根据对话进度主动收束
+- 每次回复控制在200字以内
+- 以场景中涉及的角色身份与用户互动（如产品经理、CTO、法务、同事等）
+- 保持真实感和紧迫感
+- 在用户做出 2~3 个关键抉择后，结束模拟并给出评价
+
+结局格式（必须严格按此格式输出）：
+---
+[场景结局]
+（2~4句话描述故事的最终结果：你的每一个选择带来的具体后果）
+
+[评价]
+伦理意识：X/10 — 一句话评语
+法律合规：X/10 — 一句话评语
+沟通能力：X/10 — 一句话评语
+决策果断性：X/10 — 一句话评语
+
+[总评]
+（整体评价 + 1~2条改进建议，语气像前辈在复盘）
+---
+
+注意：[场景结局][评价][总评] 这三个标记必须出现，格式不能省略。评分要客观，依据用户在对话中的实际表现。
+
+现在开始。请以场景中关键角色的身份向用户发问或呈现第一个困境选择。'''
+        else:
+            system_prompt = ROLEPLAY_SYSTEM_PROMPTS.get(scenario, ROLEPLAY_SYSTEM_PROMPTS['data-breach'])
         sessions[session_id] = {
             'messages': [{'role': 'system', 'content': system_prompt}],
             'scenario': scenario
@@ -312,7 +346,7 @@ def evaluate():
         'compliance-audit': '甲方合规审查',
         'insider-threat': '内部安全审计'
     }
-    scenario_name = scenario_names.get(scenario, '未知场景')
+    scenario_name = scenario_names.get(scenario, scenario if scenario else '未知场景')
 
     eval_prompt = f'''请根据以上关于"{scenario_name}"情景的完整对话历史，对用户（扮演工程师角色）的表现进行客观评价。
 
@@ -377,10 +411,221 @@ def reset_session():
         del sessions[session_id]
     return jsonify({'ok': True})
 
+# ---------- AI 图片生成 ----------
+
+IMG_PROVIDER = (config.get('img_provider', 'pollinations') if config else 'pollinations')
+IMG_API_KEY = (config.get('img_api_key', '') if config else '')
+IMG_MODEL = (config.get('img_model', 'qwen-image') if config else 'qwen-image')
+IMG_BASE_URL = (config.get('img_base_url', '') if config else '')
+VOLC_AK = (config.get('volc_access_key', '') if config else '')
+VOLC_SK = (config.get('volc_secret_key', '') if config else '')
+
+import hashlib
+import hmac
+import datetime
+
+def volc_sign(method, host, path, params, body, service='visual', region='cn-north-1'):
+    """火山引擎签名 V4"""
+    now = datetime.datetime.utcnow()
+    date_stamp = now.strftime('%Y%m%d')
+    amz_date = now.strftime('%Y%m%dT%H%M%SZ')
+    credential_scope = f'{date_stamp}/{region}/{service}/request'
+
+    # Canonical request
+    canonical_headers = f'content-type:application/json\nhost:{host}\nx-date:{amz_date}\n'
+    signed_headers = 'content-type;host;x-date'
+    payload_hash = hashlib.sha256(body.encode('utf-8')).hexdigest()
+    canonical_request = f'{method}\n{path}\n{params}\n{canonical_headers}\n{signed_headers}\n{payload_hash}'
+
+    # String to sign
+    algorithm = 'HMAC-SHA256'
+    string_to_sign = f'{algorithm}\n{amz_date}\n{credential_scope}\n{hashlib.sha256(canonical_request.encode("utf-8")).hexdigest()}'
+
+    # Signing key
+    k_date = hmac.new(('VOLC' + VOLC_SK).encode('utf-8'), date_stamp.encode('utf-8'), hashlib.sha256).digest()
+    k_region = hmac.new(k_date, region.encode('utf-8'), hashlib.sha256).digest()
+    k_service = hmac.new(k_region, service.encode('utf-8'), hashlib.sha256).digest()
+    k_signing = hmac.new(k_service, 'request'.encode('utf-8'), hashlib.sha256).digest()
+    signature = hmac.new(k_signing, string_to_sign.encode('utf-8'), hashlib.sha256).hexdigest()
+
+    auth = f'{algorithm} Credential={VOLC_AK}/{credential_scope}, SignedHeaders={signed_headers}, Signature={signature}'
+    return amz_date, auth
+
+@app.route('/api/gen-image', methods=['POST'])
+def gen_image():
+    """AI 图片生成 — 支持火山引擎即梦 / Pollinations"""
+    data = request.get_json()
+    prompt = data.get('prompt', '')
+    if not prompt:
+        return jsonify({'error': 'prompt is required'}), 400
+
+    provider = data.get('provider', IMG_PROVIDER)
+
+    if provider == 'agnes':
+        if not IMG_API_KEY:
+            return jsonify({'error': 'Agnes API Key 未配置'}), 500
+        try:
+            resp = requests.post(
+                f'{IMG_BASE_URL}/v1/images/generations',
+                headers={
+                    'Authorization': f'Bearer {IMG_API_KEY}',
+                    'Content-Type': 'application/json'
+                },
+                json={
+                    'model': IMG_MODEL,
+                    'prompt': prompt,
+                    'n': 1,
+                    'size': '1024x768'
+                },
+                timeout=60
+            )
+            if resp.status_code == 200:
+                r = resp.json()
+                url = r['data'][0].get('url', '') if r.get('data') else ''
+                if url:
+                    return jsonify({'url': url, 'provider': 'agnes'})
+            return jsonify({'error': f'Agnes API 错误: {resp.status_code} {resp.text[:200]}'}), 500
+        except Exception as e:
+            return jsonify({'error': f'Agnes API 异常: {str(e)}'}), 500
+
+    elif provider == 'aimlapi':
+        if not IMG_API_KEY:
+            return jsonify({'error': '图片 API Key 未配置'}), 500
+        try:
+            resp = requests.post(
+                'https://api.aimlapi.com/v1/images/generations',
+                headers={
+                    'Authorization': f'Bearer {IMG_API_KEY}',
+                    'Content-Type': 'application/json'
+                },
+                json={
+                    'model': IMG_MODEL,
+                    'prompt': prompt,
+                    'n': 1,
+                    'size': '1024x768',
+                    'response_format': 'url'
+                },
+                timeout=60
+            )
+            if resp.status_code == 200:
+                r = resp.json()
+                url = r['data'][0]['url'] if r.get('data') else ''
+                if url:
+                    # Some providers return base64, handle both
+                    if url.startswith('data:'):
+                        return jsonify({'url': url, 'provider': 'aimlapi'})
+                    return jsonify({'url': url, 'provider': 'aimlapi'})
+            # If images/generations not supported, try chat completions with image-capable model
+            resp2 = requests.post(
+                'https://api.aimlapi.com/v1/chat/completions',
+                headers={
+                    'Authorization': f'Bearer {IMG_API_KEY}',
+                    'Content-Type': 'application/json'
+                },
+                json={
+                    'model': IMG_MODEL,
+                    'messages': [{'role': 'user', 'content': f'Generate an image: {prompt}'}],
+                    'max_tokens': 2000
+                },
+                timeout=60
+            )
+            if resp2.status_code == 200:
+                r2 = resp2.json()
+                content = r2['choices'][0]['message'].get('content', '')
+                # Try to extract image URL from markdown or direct
+                import re
+                urls = re.findall(r'https?://[^\s<>"]+\.(?:png|jpg|jpeg|webp)(?:\?[^\s<>"]*)?', content)
+                if urls:
+                    return jsonify({'url': urls[0], 'provider': 'aimlapi'})
+                # Check if content itself is a URL
+                if content.startswith('http'):
+                    return jsonify({'url': content.strip(), 'provider': 'aimlapi'})
+            return jsonify({'error': f'AIML API 错误: {resp.status_code} {resp.text[:200]}'}), 500
+        except Exception as e:
+            return jsonify({'error': f'AIML API 异常: {str(e)}'}), 500
+
+    elif provider == 'volcengine':
+        if not VOLC_AK or not VOLC_SK:
+            return jsonify({'error': '火山引擎密钥未配置，请在 config.json 中设置 volc_access_key 和 volc_secret_key'}), 500
+
+        try:
+            host = 'visual.volcengineapi.com'
+            path = '/'
+            params = 'Action=CVProcess&Version=2022-08-31'
+            body = json.dumps({
+                'req_key': 'high_aes_general_v20_L',
+                'prompt': prompt,
+                'model_version': 'general_v2.0_L',
+                'width': 768,
+                'height': 512,
+                'scale': 3.5,
+                'seed': -1,
+                'return_url': True,
+                'logo_info': {'add_logo': False}
+            })
+            amz_date, auth = volc_sign('POST', host, path, params, body)
+
+            # Submit task
+            resp = requests.post(
+                f'https://{host}/?{params}',
+                headers={
+                    'Content-Type': 'application/json',
+                    'X-Date': amz_date,
+                    'Authorization': auth
+                },
+                data=body,
+                timeout=30
+            )
+            result = resp.json()
+            if result.get('code') != 10000:
+                return jsonify({'error': f'即梦提交失败: {result.get("message", result)}'}), 500
+
+            task_id = result['data']['task_id']
+
+            # Poll for result (max 60s)
+            for _ in range(30):
+                time.sleep(2)
+                params2 = 'Action=CVGetResult&Version=2022-08-31'
+                body2 = json.dumps({'req_key': 'high_aes_general_v20_L', 'task_id': task_id})
+                amz_date2, auth2 = volc_sign('POST', host, path, params2, body2)
+
+                resp2 = requests.post(
+                    f'https://{host}/?{params2}',
+                    headers={
+                        'Content-Type': 'application/json',
+                        'X-Date': amz_date2,
+                        'Authorization': auth2
+                    },
+                    data=body2,
+                    timeout=15
+                )
+                r2 = resp2.json()
+                if r2.get('code') != 10000:
+                    continue
+                if r2['data'].get('status') == 'done':
+                    urls = r2['data'].get('image_urls', [])
+                    if urls:
+                        return jsonify({'url': urls[0], 'provider': 'volcengine'})
+
+            return jsonify({'error': '图片生成超时，请重试'}), 500
+
+        except Exception as e:
+            return jsonify({'error': f'即梦API错误: {str(e)}'}), 500
+
+    else:
+        # Pollinations fallback
+        encoded = requests.utils.quote(prompt)
+        url = f'https://image.pollinations.ai/prompt/{encoded}?width=768&height=512&nologo=true&model=flux'
+        return jsonify({'url': url, 'provider': 'pollinations'})
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
+    img_names = {'agnes': 'Agnes AI', 'volcengine': '即梦(火山引擎)', 'aimlapi': 'AIML API', 'pollinations': 'Pollinations.ai(免费)'}
+    img_info = img_names.get(IMG_PROVIDER, IMG_PROVIDER)
     print(f'\n  代码之下 — AI 后端服务')
     print(f'  Model: {MODEL}')
     print(f'  API Key: {"已配置" if API_KEY else "未配置 — 请编辑 config.json"}')
+    print(f'  图片生成: {img_info}')
     print(f'  地址: http://0.0.0.0:{port}\n')
     app.run(host='0.0.0.0', port=port)
