@@ -958,7 +958,7 @@ const teamMembers = [
   { name: '刘芝瑜', role: '前端开发', bio: '交互逻辑实现' },
   { name: '靳浩田', role: '内容策划', bio: '案例与题库设计' },
   { name: '彭健峰', role: '视觉设计', bio: 'UI/UX 与动效' },
-  { name: '戴淇宗', role: '数据调研', bio: '法规与合规资料' },
+  { name: '戴琪宗', role: '数据调研', bio: '法规与合规资料' },
   { name: '罗可', role: '项目统筹', bio: '项目复盘与成果汇总' }
 ];
 
