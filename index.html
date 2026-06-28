@@ -711,7 +711,7 @@
   <!-- ============================================
        SECTION 7 — AI Q&A
        ============================================ -->
-  <section id="qa" class="py-32 px-6 bg-slate-50 relative overflow-hidden">
+  <section id="qa" class="qa-expert-section py-32 px-6 bg-slate-50 relative overflow-hidden">
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
       <div class="section-orb orb-qa-1"></div>
       <span class="floating-qm fq-1">?</span>
@@ -726,10 +726,16 @@
       <span class="eng-deco ed-node-link ed-nl2"></span>
       <span class="eng-deco ed-search">🔍 query: "data privacy" → 23 results</span>
       <div class="section-wave-pattern"></div>
+      <div class="qa-orbit-ring qa-ring-a"></div>
+      <div class="qa-orbit-ring qa-ring-b"></div>
+      <div class="qa-side-visual qa-side-left"><span>AI</span></div>
+      <div class="qa-side-visual qa-side-right"><span>🔐</span></div>
+      <span class="qa-binary qa-bin-left">010101&nbsp;&nbsp;101010<br>privacy · consent</span>
+      <span class="qa-binary qa-bin-right">risk level<br>low · mid · high</span>
     </div>
-    <div class="max-w-5xl mx-auto relative z-10">
+    <div class="qa-expert-wrap max-w-7xl mx-auto relative z-10">
 
-      <div class="text-center mb-16 fade-up" data-fade>
+      <div class="text-center mb-10 fade-up" data-fade>
         <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold tracking-wide text-blue-700 mb-5">
           AI Expert
         </span>
@@ -737,17 +743,25 @@
         <p class="text-slate-500 text-lg font-normal max-w-xl mx-auto">向 AI 安全专家提问，获取专业的伦理与合规建议</p>
       </div>
 
+      <div class="qa-topic-strip fade-up" data-fade aria-label="问答主题">
+        <span class="qa-topic-chip blue">数据隐私</span>
+        <span class="qa-topic-chip green">AI责任</span>
+        <span class="qa-topic-chip violet">劳动伦理</span>
+        <span class="qa-topic-chip cyan">代码安全</span>
+        <span class="qa-topic-chip orange">合规风险</span>
+      </div>
+
       <!-- Quick questions -->
       <div class="flex flex-wrap gap-2 mb-8 justify-center fade-up" data-fade id="quickQuestions">
         <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('老板让我默认勾选用户通讯录，这是行业惯例吗？我该怎么做？')">🤔 老板让我默认勾选通讯录</span>
         <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('GPL协议的『传染性』到底是什么？不小心用了会怎样？')">⚠️ GPL 传染性是什么</span>
         <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('同事代码里有后门，我举报了会不会毁了他的职业生涯？')">😰 同事代码有后门该举报吗</span>
-        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('AI换脸骗了那么多人，开发者需要负责吗？')">🎭 AI 换脸开发者有责任吗</span>
         <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('把公司代码拷回家加班，算不算违法？')">💻 拷代码回家加班违法吗</span>
+        <span class="quick-q inline-block px-4 py-2 rounded-full bg-white border border-slate-200 text-xs text-slate-600 cursor-pointer hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 shadow-sm" onclick="askQuickQuestion('AI换脸骗了那么多人，开发者需要负责吗？')">🤖 AI 换脸开发者有责任吗</span>
       </div>
 
       <!-- Chat area -->
-      <div class="fade-up" data-fade>
+      <div class="qa-console fade-up" data-fade>
         <div class="rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xl shadow-slate-200/50 qa-chat-shell">
           <!-- QA controls: new convo + history -->
           <div class="qa-toolbar flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-3 bg-white border-b border-slate-100">
@@ -758,10 +772,14 @@
             <div id="qaHistoryArea" class="qa-history-meta text-sm text-slate-500">已保存对话：<span id="qaHistoryCount">0</span></div>
           </div>
           <!-- Messages -->
-          <div id="qaMessages" class="p-6 min-h-[320px] max-h-[500px] overflow-y-auto flex flex-col gap-4">
-            <div class="text-center text-slate-400 py-12">
-              <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg>
-              <p class="text-sm">向 AI 安全伦理专家提问</p>
+          <div id="qaMessages" class="p-6 min-h-[420px] max-h-[560px] overflow-y-auto flex flex-col gap-4">
+            <div class="qa-empty-state">
+              <div class="qa-empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="25" fill="currentColor" opacity="0.08"/><path d="M32 12l16 6v12c0 12-7.8 20.8-16 24-8.2-3.2-16-12-16-24V18l16-6z" stroke="currentColor" stroke-width="3"/><path d="M23 32l6 6 13-14" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <h3>欢迎向 AI 安全伦理专家提问</h3>
+              <p>我可以帮助你解答 AI 安全、伦理合规相关问题，提供专业的分析与建议。</p>
+              <span>可咨询：数据合规、AI 责任、专业伦理、安全风险等话题。</span>
             </div>
           </div>
 
@@ -775,21 +793,37 @@
           </div>
 
           <!-- Input -->
-          <div class="border-t border-slate-200 px-5 py-4 bg-slate-50/50">
+          <div class="qa-input-panel border-t border-slate-200 px-5 py-4 bg-slate-50/50">
             <div class="flex items-center gap-3">
               <input id="qaInput" type="text" placeholder="输入你的安全/伦理问题..." class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-300" onkeydown="if(event.key==='Enter')sendQAMessage()">
-              <button onclick="sendQAMessage()" class="px-5 py-3 rounded-2xl bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-500/25 hover:bg-blue-600 hover:shadow-blue-500/35 transition-all duration-300 hover:-translate-y-0.5 shrink-0">
+              <button onclick="sendQAMessage()" class="qa-send-btn px-5 py-3 rounded-2xl bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-500/25 hover:bg-blue-600 hover:shadow-blue-500/35 transition-all duration-300 hover:-translate-y-0.5 shrink-0">
                 提问
               </button>
+            </div>
+            <div class="qa-input-meta">
+              <span>附件资料</span>
+              <span>查看历史</span>
+              <span>推荐问题</span>
+              <b>安全回答 · 合规建议 · 仅供参考</b>
             </div>
           </div>
 
         </div>
       </div>
 
+      <div class="qa-guide-grid fade-up" data-fade aria-label="问答说明">
+        <article><strong>咨询范围</strong><span>数据合规与隐私保护</span><span>AI 责任与透明度</span><span>伦理与社会影响</span><span>安全与风险管理</span></article>
+        <article><strong>回答原则</strong><span>客观中立，基于事实</span><span>符合法律与规范</span><span>注重公平与解释</span><span>保护隐私与安全</span></article>
+        <article><strong>AI建议流程</strong><span>理解问题与背景</span><span>分析风险与影响</span><span>提出建议与参考</span><span>持续跟踪与完善</span></article>
+        <article><strong>典型话题</strong><span>数据使用是否合法？</span><span>算法是否存在偏见？</span><span>AI 决策如何解释？</span><span>安全漏洞如何应对？</span></article>
+        <article><strong>伦理维度</strong><span>尊重人权与隐私</span><span>公平公正与非歧视</span><span>透明可解释</span><span>可控可追溯</span></article>
+        <article class="qa-risk-card"><strong>风险等级提示</strong><span>低风险：可控可接受</span><span>中风险：需评估缓解</span><span>高风险：需重点管控</span><span>极高风险：不可接受</span></article>
+      </div>
+
+      <div class="qa-footer-note">AI 安全 · 伦理合规 · 智慧问答</div>
+
     </div>
   </section>
-
   <!-- ============================================
        FOOTER
        ============================================ -->

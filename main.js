@@ -2736,7 +2736,14 @@ function getQAMessageText(message) {
 }
 
 function renderQAEmptyState() {
-  return `<div class="text-center text-slate-400 py-12"><svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg><p class="text-sm">向 AI 安全伦理专家提问</p></div>`;
+  return `<div class="qa-empty-state">
+    <div class="qa-empty-icon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="25" fill="currentColor" opacity="0.08"/><path d="M32 12l16 6v12c0 12-7.8 20.8-16 24-8.2-3.2-16-12-16-24V18l16-6z" stroke="currentColor" stroke-width="3"/><path d="M23 32l6 6 13-14" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h3>欢迎向 AI 安全伦理专家提问</h3>
+    <p>我可以帮助你解答 AI 安全、伦理合规相关问题，提供专业的分析与建议。</p>
+    <span>可咨询：数据合规、AI 责任、专业伦理、安全风险等话题。</span>
+  </div>`;
 }
 
 function appendQAMessage(container, message) {
