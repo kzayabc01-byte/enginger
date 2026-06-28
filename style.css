@@ -2582,3 +2582,221 @@ html.dark .bg-floating-orb.orb-c { background: radial-gradient(circle, rgba(251,
 .border-glow-card:hover::before {
   opacity: 1;
 }
+
+/* --- QA conversation controls and history --- */
+.qa-chat-shell {
+  position: relative;
+}
+.qa-toolbar {
+  gap: 0.75rem;
+}
+.qa-action-btn {
+  min-height: 36px;
+  padding: 0.45rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+.qa-action-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(59, 130, 246, 0.3);
+  background: #EFF6FF;
+  color: #2563EB;
+  box-shadow: 0 8px 18px -12px rgba(37, 99, 235, 0.45);
+}
+.qa-action-primary {
+  border-color: rgba(16, 185, 129, 0.25);
+  background: #ECFDF5;
+  color: #059669;
+}
+.qa-action-primary:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: #D1FAE5;
+  color: #047857;
+  box-shadow: 0 8px 18px -12px rgba(5, 150, 105, 0.45);
+}
+.qa-history-meta {
+  white-space: nowrap;
+}
+.qa-history-panel {
+  padding: 0.9rem 1rem 1rem;
+}
+.qa-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 800;
+}
+.qa-history-head button {
+  color: #64748B;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0.25rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  transition: all 0.25s ease;
+}
+.qa-history-head button:hover {
+  color: #2563EB;
+  border-color: rgba(59, 130, 246, 0.28);
+  background: #EFF6FF;
+}
+.qa-history-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.65rem;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+.qa-history-item {
+  position: relative;
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.75rem;
+  border-radius: 14px;
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  cursor: pointer;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.qa-history-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 12px 24px -18px rgba(15, 23, 42, 0.55);
+}
+.qa-history-item.active {
+  border-color: rgba(16, 185, 129, 0.55);
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.95), rgba(239, 246, 255, 0.9));
+}
+.qa-history-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.qa-history-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #1E293B;
+  font-size: 14px;
+  font-weight: 800;
+}
+.qa-history-time,
+.qa-history-subline {
+  color: #94A3B8;
+  font-size: 12px;
+  font-weight: 600;
+}
+.qa-history-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+.qa-history-actions button {
+  min-height: 28px;
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  transition: all 0.2s ease;
+}
+.qa-history-open {
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  background: #EFF6FF;
+  color: #2563EB;
+}
+.qa-history-open:hover {
+  background: #DBEAFE;
+}
+.qa-history-delete {
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  background: #FEF2F2;
+  color: #DC2626;
+}
+.qa-history-delete:hover {
+  background: #FEE2E2;
+}
+.qa-history-empty {
+  grid-column: 1 / -1;
+  padding: 1.1rem;
+  border: 1px dashed #CBD5E1;
+  border-radius: 14px;
+  color: #64748B;
+  text-align: center;
+  font-size: 14px;
+}
+html.dark .qa-action-btn,
+html.dark .qa-history-head button,
+html.dark .qa-history-item {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.46);
+  color: #CBD5E1;
+}
+html.dark .qa-action-primary {
+  border-color: rgba(52, 211, 153, 0.25);
+  background: rgba(16, 185, 129, 0.12);
+  color: #6EE7B7;
+}
+html.dark .qa-action-btn:hover,
+html.dark .qa-history-head button:hover {
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(59, 130, 246, 0.12);
+  color: #93C5FD;
+}
+html.dark .qa-history-panel {
+  background: rgba(15, 23, 42, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+html.dark .qa-history-head,
+html.dark .qa-history-title {
+  color: #E2E8F0;
+}
+html.dark .qa-history-time,
+html.dark .qa-history-subline,
+html.dark .qa-history-meta {
+  color: #94A3B8 !important;
+}
+html.dark .qa-history-item.active {
+  border-color: rgba(52, 211, 153, 0.45);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(59, 130, 246, 0.10));
+}
+html.dark .qa-history-open {
+  border-color: rgba(96, 165, 250, 0.18);
+  background: rgba(59, 130, 246, 0.12);
+  color: #93C5FD;
+}
+html.dark .qa-history-delete {
+  border-color: rgba(248, 113, 113, 0.18);
+  background: rgba(239, 68, 68, 0.12);
+  color: #FCA5A5;
+}
+html.dark .qa-history-empty {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #94A3B8;
+}
+@media (max-width: 640px) {
+  .qa-history-items {
+    grid-template-columns: 1fr;
+  }
+  .qa-toolbar > div:first-child {
+    width: 100%;
+  }
+  .qa-action-btn {
+    flex: 1;
+  }
+  .qa-history-meta {
+    white-space: normal;
+  }
+}

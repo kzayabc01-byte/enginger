@@ -2473,6 +2473,7 @@ function lockRolePlayInput() {
 // ==============================================
 let qaSessionId = '';
 let qaIsTyping = false;
+let qaHistoryExpanded = false;
 
 function sendQAMessage() {
   if (qaIsTyping) return;
@@ -2490,8 +2491,10 @@ function sendQAMessage() {
   const placeholder = messages.querySelector('.text-center');
   if (placeholder) placeholder.remove();
 
-  // Add user message
+  // Add user message to UI and storage
   messages.innerHTML += `<div class="chat-bubble user">${escapeHtml(text)}</div>`;
+  // persist user message and obtain session id
+  qaSessionId = addMessageToSession(qaSessionId, 'user', text);
 
   // Loading
   const loadingId = 'qa-loading-' + Date.now();
@@ -2521,8 +2524,15 @@ function sendQAMessage() {
     if (data.error) {
       messages.innerHTML += `<div class="chat-bubble ai" style="color:#EF4444;">⚠️ ${escapeHtml(data.error)}</div>`;
     } else {
-      qaSessionId = data.session_id;
-      typewriterEffect(messages, data.message, 'ai');
+      // if server returned a session id different from current, migrate local messages
+      if (data.session_id && qaSessionId !== data.session_id) {
+        migrateSession(qaSessionId, data.session_id);
+        qaSessionId = data.session_id;
+      }
+      // show AI with typewriter and save when complete
+      typewriterEffect(messages, data.message, 'ai', function() {
+        addMessageToSession(qaSessionId, 'ai', data.message);
+      });
     }
     messages.scrollTop = messages.scrollHeight;
   })
@@ -2538,6 +2548,298 @@ function askQuickQuestion(question) {
   document.getElementById('qaInput').value = question;
   sendQAMessage();
 }
+
+// -------------------------
+// QA History (localStorage + server sync)
+// -------------------------
+function _qaStorageKey() { return 'codezhixia_qa_history_v1'; }
+
+function createLocalSessionId() {
+  return 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+}
+
+function normalizeQAStore(store) {
+  const safe = store && typeof store === 'object' ? store : {};
+  const sessions = safe.sessions && typeof safe.sessions === 'object' ? safe.sessions : {};
+  const order = Array.isArray(safe.order) ? safe.order.filter(id => sessions[id]) : Object.keys(sessions);
+  Object.keys(sessions).forEach(id => {
+    const s = sessions[id] || {};
+    s.id = s.id || id;
+    s.title = s.title || '未命名对话';
+    s.messages = Array.isArray(s.messages) ? s.messages : [];
+    s.updated = s.updated || Date.now();
+    sessions[id] = s;
+    if (!order.includes(id)) order.push(id);
+  });
+  return { sessions, order };
+}
+
+function loadQAHistory() {
+  try {
+    const raw = localStorage.getItem(_qaStorageKey());
+    return normalizeQAStore(raw ? JSON.parse(raw) : { sessions: {}, order: [] });
+  } catch(e) {
+    return { sessions: {}, order: [] };
+  }
+}
+
+function persistQAHistory(data) {
+  localStorage.setItem(_qaStorageKey(), JSON.stringify(normalizeQAStore(data)));
+}
+
+function saveQAHistory(data, options = {}) {
+  const store = normalizeQAStore(data);
+  persistQAHistory(store);
+  renderQAHistory();
+  if (options.sync === false || !navigator.onLine) return;
+  Object.keys(store.sessions || {}).forEach(id => {
+    syncSaveSession(id).catch(()=>{});
+  });
+}
+
+function formatQATime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  if (Number.isNaN(d.getTime())) return '';
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  if (sameDay) return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
+}
+
+function getQAMessageText(message) {
+  return message ? (message.text || message.content || '') : '';
+}
+
+function renderQAEmptyState() {
+  return `<div class="text-center text-slate-400 py-12"><svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg><p class="text-sm">向 AI 安全伦理专家提问</p></div>`;
+}
+
+function appendQAMessage(container, message) {
+  const role = message.role === 'user' ? 'user' : 'ai';
+  const text = getQAMessageText(message);
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble ' + role;
+  bubble.innerHTML = role === 'ai' ? renderMarkdown(text) : escapeHtml(text);
+  container.appendChild(bubble);
+}
+
+function migrateSession(oldId, newId) {
+  if (!oldId || oldId === newId) return;
+  const store = loadQAHistory();
+  if (!store.sessions[oldId]) return;
+  if (!store.sessions[newId]) {
+    store.sessions[newId] = { id: newId, title: store.sessions[oldId].title, messages: [], updated: Date.now() };
+  }
+  store.sessions[newId].messages = store.sessions[newId].messages.concat(store.sessions[oldId].messages);
+  store.sessions[newId].updated = Date.now();
+  delete store.sessions[oldId];
+  store.order = [newId].concat(store.order.filter(id => id !== oldId && id !== newId));
+  saveQAHistory(store);
+}
+
+function addMessageToSession(sessionId, role, text) {
+  const id = sessionId || createLocalSessionId();
+  const store = loadQAHistory();
+  if (!store.sessions[id]) {
+    store.sessions[id] = { id, title: '未命名对话', messages: [], updated: Date.now() };
+  }
+  store.sessions[id].messages.push({ role, text, ts: Date.now() });
+  store.sessions[id].updated = Date.now();
+  if (role === 'user' && (!store.sessions[id].title || store.sessions[id].title === '未命名对话')) {
+    store.sessions[id].title = text.length > 34 ? text.slice(0, 34) + '...' : text;
+  }
+  store.order = [id].concat(store.order.filter(item => item !== id));
+  saveQAHistory(store);
+  return id;
+}
+
+function renderQAHistory() {
+  const store = loadQAHistory();
+  const container = document.getElementById('qaHistoryItems');
+  const count = document.getElementById('qaHistoryCount');
+  const toggle = document.getElementById('qaToggleHistory');
+  const panel = document.getElementById('qaHistoryList');
+  if (!container || !count) return;
+
+  count.textContent = store.order.length;
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', qaHistoryExpanded ? 'true' : 'false');
+    toggle.textContent = qaHistoryExpanded ? '收起历史' : '历史对话';
+  }
+  if (panel) panel.classList.toggle('hidden', !qaHistoryExpanded);
+
+  container.innerHTML = '';
+  if (!store.order.length) {
+    container.innerHTML = '<div class="qa-history-empty">还没有保存的历史对话，发送第一条问题后会自动保存。</div>';
+    return;
+  }
+
+  store.order.forEach(id => {
+    const s = store.sessions[id];
+    if (!s) return;
+    const item = document.createElement('div');
+    item.className = 'qa-history-item' + (id === qaSessionId ? ' active' : '');
+    item.title = s.title || '未命名对话';
+    item.innerHTML = `
+      <div class="qa-history-title-row">
+        <span class="qa-history-title">${escapeHtml(s.title || '未命名对话')}</span>
+        <span class="qa-history-time">${escapeHtml(formatQATime(s.updated))}</span>
+      </div>
+      <div class="qa-history-subline">${s.messages.length} 条消息</div>
+      <div class="qa-history-actions">
+        <button type="button" class="qa-history-open">展开</button>
+        <button type="button" class="qa-history-delete">删除</button>
+      </div>
+    `;
+    item.addEventListener('click', event => {
+      if (event.target.closest('button')) return;
+      loadQAConversation(id);
+    });
+    item.querySelector('.qa-history-open').addEventListener('click', event => {
+      event.stopPropagation();
+      loadQAConversation(id);
+    });
+    item.querySelector('.qa-history-delete').addEventListener('click', event => {
+      event.stopPropagation();
+      deleteQAConversation(id);
+    });
+    container.appendChild(item);
+  });
+}
+
+// -------------------------
+// Server sync helpers
+// -------------------------
+async function syncFetchAll() {
+  try {
+    const r = await fetch('/api/qa/history');
+    if (!r.ok) throw new Error('no');
+    const data = await r.json();
+    const local = loadQAHistory();
+    const merged = normalizeQAStore(local);
+    const serverOrder = [];
+
+    for (const item of (data.sessions || [])) {
+      serverOrder.push(item.id);
+      if (!merged.sessions[item.id]) {
+        merged.sessions[item.id] = { id: item.id, title: item.title || item.id, messages: [], updated: item.updated || Date.now() };
+      } else {
+        merged.sessions[item.id].title = item.title || merged.sessions[item.id].title;
+        merged.sessions[item.id].updated = Math.max(merged.sessions[item.id].updated || 0, item.updated || 0);
+      }
+      try {
+        const r2 = await fetch(`/api/qa/history/${item.id}`);
+        if (!r2.ok) continue;
+        const jd = await r2.json();
+        if (jd.session) {
+          merged.sessions[item.id] = normalizeQAStore({ sessions: { [item.id]: jd.session }, order: [item.id] }).sessions[item.id];
+        }
+      } catch(e) {}
+    }
+
+    merged.order = serverOrder.concat(merged.order.filter(id => !serverOrder.includes(id) && merged.sessions[id]));
+    persistQAHistory(merged);
+    renderQAHistory();
+    return merged;
+  } catch(e) {
+    return null;
+  }
+}
+
+async function syncSaveSession(sessionId) {
+  try {
+    const store = loadQAHistory();
+    const s = store.sessions[sessionId];
+    if (!s) return;
+    await fetch('/api/qa/history', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ session: s })
+    });
+  } catch(e) {}
+}
+
+async function syncDeleteSession(sessionId) {
+  try {
+    await fetch(`/api/qa/history/${sessionId}`, { method: 'DELETE' });
+  } catch(e) {}
+}
+
+function toggleQAHistory() {
+  qaHistoryExpanded = !qaHistoryExpanded;
+  renderQAHistory();
+}
+
+function newQAConversation() {
+  qaSessionId = '';
+  const messages = document.getElementById('qaMessages');
+  const input = document.getElementById('qaInput');
+  if (messages) messages.innerHTML = renderQAEmptyState();
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+  renderQAHistory();
+}
+
+async function loadQAConversation(sessionId) {
+  const container = document.getElementById('qaMessages');
+  if (!container) return;
+  container.innerHTML = '';
+
+  let session = null;
+  if (navigator.onLine) {
+    try {
+      const r = await fetch(`/api/qa/history/${sessionId}`);
+      if (r.ok) {
+        const jd = await r.json();
+        session = jd.session;
+      }
+    } catch(e) {}
+  }
+  if (!session) {
+    const store = loadQAHistory();
+    session = store.sessions[sessionId];
+  }
+  if (!session) {
+    container.innerHTML = '<div class="qa-history-empty">这段历史对话不存在或已被删除。</div>';
+    return;
+  }
+
+  const store = loadQAHistory();
+  store.sessions[sessionId] = normalizeQAStore({ sessions: { [sessionId]: session }, order: [sessionId] }).sessions[sessionId];
+  store.order = [sessionId].concat(store.order.filter(id => id !== sessionId));
+  persistQAHistory(store);
+
+  qaSessionId = sessionId;
+  (store.sessions[sessionId].messages || []).forEach(m => appendQAMessage(container, m));
+  if (!store.sessions[sessionId].messages.length) container.innerHTML = renderQAEmptyState();
+  container.scrollTop = container.scrollHeight;
+  renderQAHistory();
+}
+
+function deleteQAConversation(sessionId) {
+  const store = loadQAHistory();
+  if (!store.sessions[sessionId]) return;
+  if (!confirm('确定删除这段历史对话吗？')) return;
+  delete store.sessions[sessionId];
+  store.order = store.order.filter(id => id !== sessionId);
+  saveQAHistory(store, { sync: false });
+  if (navigator.onLine) syncDeleteSession(sessionId).catch(()=>{});
+  if (qaSessionId === sessionId) newQAConversation();
+  renderQAHistory();
+}
+// initialize history count on page load
+document.addEventListener('DOMContentLoaded', () => {
+  // try to sync from server first, fallback to local
+  if (navigator.onLine) {
+    syncFetchAll().then(ret => {
+      if (!ret) renderQAHistory();
+    }).catch(()=>{ renderQAHistory(); });
+  } else {
+    renderQAHistory();
+  }
+});
 
 // ==============================================
 // 14. TYPEWRITER EFFECT

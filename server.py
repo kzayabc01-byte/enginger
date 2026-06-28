@@ -7,6 +7,7 @@
 import json
 import os
 import uuid
+import datetime
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import requests
@@ -32,6 +33,31 @@ BASE_URL = (config.get('base_url', 'https://api.deepseek.com') if config else 'h
 
 # ---------- 会话存储（内存） ----------
 sessions = {}  # session_id -> {messages: [...], created_at: ...}
+
+# QA 历史持久化到文件
+QA_HISTORY_FILE = os.path.join(STATIC_DIR, 'qa_history.json')
+qa_store = None
+
+def load_qa_store():
+    global qa_store
+    if qa_store is not None:
+        return qa_store
+    if os.path.exists(QA_HISTORY_FILE):
+        try:
+            with open(QA_HISTORY_FILE, 'r', encoding='utf-8') as f:
+                qa_store = json.load(f)
+        except Exception:
+            qa_store = {'sessions': {}, 'order': []}
+    else:
+        qa_store = {'sessions': {}, 'order': []}
+    return qa_store
+
+def save_qa_store():
+    try:
+        with open(QA_HISTORY_FILE, 'w', encoding='utf-8') as f:
+            json.dump(qa_store or {'sessions': {}, 'order': []}, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print('保存 QA 历史失败:', e)
 
 MAX_HISTORY = 30  # 每个会话最多保留的消息数
 
@@ -253,6 +279,32 @@ def roleplay():
         ai_message = result['choices'][0]['message']['content']
         session['messages'].append({'role': 'assistant', 'content': ai_message})
 
+        # also persist to qa_store
+        try:
+            store = load_qa_store()
+            entry = store['sessions'].get(session_id, {'id': session_id, 'title': '', 'messages': [], 'updated': 0})
+            existing_texts = {(x.get('role'), x.get('text')) for x in entry['messages']}
+            for m in session['messages']:
+                if m.get('role') == 'system':
+                    continue
+                row = (m.get('role'), m.get('content', ''))
+                if row not in existing_texts:
+                    entry['messages'].append({'role': m.get('role', 'user'), 'text': m.get('content', ''), 'ts': int(datetime.datetime.utcnow().timestamp()*1000)})
+                    existing_texts.add(row)
+            entry['updated'] = int(datetime.datetime.utcnow().timestamp()*1000)
+            if not entry['title']:
+                for mm in entry['messages']:
+                    if mm.get('role') == 'user':
+                        entry['title'] = mm.get('text', '')[:40]
+                        break
+            store['sessions'][session_id] = entry
+            store['order'] = [session_id] + [x for x in store.get('order', []) if x != session_id]
+            if len(store['order']) > 100:
+                store['order'] = store['order'][:100]
+            save_qa_store()
+        except Exception:
+            pass
+
         return jsonify({
             'session_id': session_id,
             'message': ai_message,
@@ -277,11 +329,25 @@ def qa():
     session_id = data.get('session_id', '')
 
     if not session_id or session_id not in sessions:
-        session_id = str(uuid.uuid4())
-        sessions[session_id] = {
-            'messages': [{'role': 'system', 'content': QA_SYSTEM_PROMPT}],
-            'scenario': 'qa'
-        }
+        restored = False
+        if session_id:
+            stored = load_qa_store().get('sessions', {}).get(session_id)
+            if stored:
+                restored_messages = [{'role': 'system', 'content': QA_SYSTEM_PROMPT}]
+                for m in stored.get('messages', []):
+                    role = 'assistant' if m.get('role') in ('ai', 'assistant') else 'user'
+                    restored_messages.append({'role': role, 'content': m.get('text', '')})
+                sessions[session_id] = {
+                    'messages': restored_messages,
+                    'scenario': 'qa'
+                }
+                restored = True
+        if not restored:
+            session_id = str(uuid.uuid4())
+            sessions[session_id] = {
+                'messages': [{'role': 'system', 'content': QA_SYSTEM_PROMPT}],
+                'scenario': 'qa'
+            }
 
     session = sessions[session_id]
     session['messages'].append({'role': 'user', 'content': question})
@@ -409,6 +475,58 @@ def reset_session():
     session_id = data.get('session_id', '')
     if session_id in sessions:
         del sessions[session_id]
+    return jsonify({'ok': True})
+
+
+# ---------- QA 历史 API（文件存储） ----------
+@app.route('/api/qa/history', methods=['GET'])
+def api_qa_history_list():
+    store = load_qa_store()
+    # return lightweight list
+    items = []
+    for sid in store.get('order', []):
+        s = store['sessions'].get(sid)
+        if not s: continue
+        items.append({'id': sid, 'title': s.get('title',''), 'updated': s.get('updated',0), 'count': len(s.get('messages',[]))})
+    return jsonify({'sessions': items})
+
+
+@app.route('/api/qa/history/<session_id>', methods=['GET'])
+def api_qa_history_get(session_id):
+    store = load_qa_store()
+    s = store['sessions'].get(session_id)
+    if not s:
+        return jsonify({'error': 'not found'}), 404
+    return jsonify({'session': s})
+
+
+@app.route('/api/qa/history', methods=['POST'])
+def api_qa_history_save():
+    data = request.get_json() or {}
+    session = data.get('session')
+    if not session or 'id' not in session:
+        return jsonify({'error': 'session required'}), 400
+    store = load_qa_store()
+    sid = session['id']
+    # normalize messages
+    msgs = []
+    for m in session.get('messages', []):
+        msgs.append({'role': m.get('role','user'), 'text': m.get('text',''), 'ts': m.get('ts', int(datetime.datetime.utcnow().timestamp()*1000))})
+    entry = {'id': sid, 'title': session.get('title',''), 'messages': msgs, 'updated': int(datetime.datetime.utcnow().timestamp()*1000)}
+    store['sessions'][sid] = entry
+    if sid not in store['order']:
+        store['order'].insert(0, sid)
+    save_qa_store()
+    return jsonify({'ok': True, 'id': sid})
+
+
+@app.route('/api/qa/history/<session_id>', methods=['DELETE'])
+def api_qa_history_delete(session_id):
+    store = load_qa_store()
+    if session_id in store.get('sessions', {}):
+        del store['sessions'][session_id]
+    store['order'] = [x for x in store.get('order', []) if x != session_id]
+    save_qa_store()
     return jsonify({'ok': True})
 
 # ---------- AI 图片生成 ----------
