@@ -1195,6 +1195,8 @@ function renderCaseCarousel() {
   carousel.innerHTML = caseStudies.map((c, index) => {
     const metrics = caseMetrics[index] || ['影响范围', '行业级', '风险类型', c.tag.split('·')[0].trim(), '事件等级', index % 3 === 0 ? '高危' : '中高危'];
     const keywords = caseKeywords[index] || ['责任边界', '合规风险', '工程伦理'];
+    const lesson = (c.full && (c.full.lesson || c.full.consequence || c.full.violation)) || c.summary;
+    const lessonText = lesson.length > 96 ? lesson.slice(0, 96) + '…' : lesson;
     return `
       <div class="case-exhibit-card snap-start shrink-0" onclick="openCaseModal(${c.id})">
         <div class="case-exhibit-top">
@@ -1214,9 +1216,9 @@ function renderCaseCarousel() {
           <span>风险关键词</span>
           <div>${keywords.map(k => `<em>${k}</em>`).join('')}</div>
         </div>
-        <div class="case-exhibit-screen" aria-hidden="true">
-          <i></i><i></i><i></i><i></i>
-          <b></b>
+        <div class="case-exhibit-lesson">
+          <span>案例启示</span>
+          <strong>${lessonText}</strong>
         </div>
       </div>
     `;
