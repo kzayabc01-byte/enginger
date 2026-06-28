@@ -108,7 +108,7 @@
   <!-- ============================================
        SECTION 1 — HERO (Education Style)
        ============================================ -->
-  <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-emerald-50/60 via-white to-amber-50/30">
+  <section id="hero" class="hero-showcase relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-emerald-50/60 via-white to-amber-50/30">
 
     <!-- Decorative floating shapes -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
@@ -147,33 +147,76 @@
       <span class="eng-deco ed-tag ed-tg1">&lt;code&gt;</span>
       <span class="eng-deco ed-tag ed-tg2">&lt;/code&gt;</span>
       <span class="eng-deco ed-brace ed-br1">def __init__(self):</span>
+      <span class="hero-watermark hero-code-left">&lt;code&gt;</span>
+      <span class="hero-watermark hero-code-right">&lt;/code&gt;</span>
+      <span class="hero-watermark hero-brace">{ }</span>
+      <div class="hero-orbit orbit-a"></div>
+      <div class="hero-orbit orbit-b"></div>
+      <div class="hero-node hn-1"></div>
+      <div class="hero-node hn-2"></div>
+      <div class="hero-node hn-3"></div>
+      <div class="hero-node hn-4"></div>
+      <svg class="hero-link-map" viewBox="0 0 1200 720" fill="none" aria-hidden="true">
+        <path d="M130 520 C260 430 390 510 510 390 S760 230 910 310 S1040 470 1120 390" />
+        <path d="M270 210 C420 260 450 140 600 190 S780 280 930 170" />
+      </svg>
     </div>
 
-    <div class="relative z-10 text-center px-6 max-w-4xl mx-auto fade-up" data-fade>
+    <div class="hero-content relative z-10 text-center px-6 mx-auto fade-up" data-fade>
       <!-- Eyebrow badge -->
-      <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold tracking-wide text-emerald-700 mb-8">
+      <span class="hero-eyebrow inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold tracking-wide text-emerald-700 mb-8">
         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
         Professional Ethics &amp; Information Security
       </span>
 
       <!-- Main title -->
-      <h1 class="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-6 leading-[1.05] text-slate-900">
+      <h1 class="hero-title text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-6 leading-[1.05] text-slate-900">
         代码<span class="shiny-text">之下</span>
       </h1>
 
       <!-- Subtitle -->
-      <p id="heroSubtitle" class="text-lg md:text-xl text-slate-500 font-normal mb-12 max-w-2xl mx-auto leading-relaxed hero-subtitle-wrapper">
-        每一行代码，都承载着工程师的责任与伦理
+      <p id="heroSubtitle" class="hero-subtitle text-lg md:text-xl text-slate-500 font-normal mb-10 max-w-2xl mx-auto leading-relaxed hero-subtitle-wrapper">
+        技术不止于代码，它塑造社会，定义未来
       </p>
 
       <!-- CTA buttons -->
-      <div class="flex items-center justify-center gap-4">
+      <div class="hero-actions flex items-center justify-center gap-4">
         <a href="#knowledge" class="magnetic-btn inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-emerald-500 text-white text-sm font-semibold shadow-lg shadow-emerald-500/25 hover:bg-emerald-600 hover:shadow-emerald-500/35 transition-all duration-300 hover:-translate-y-0.5">
           开始探索
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
         </a>
         <a href="#cases" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-white border border-slate-200 text-sm font-semibold text-slate-600 shadow-sm hover:border-emerald-200 hover:text-emerald-600 hover:bg-emerald-50/50 transition-all duration-300">
           查看案例
+        </a>
+      </div>
+
+      <div class="hero-entry-grid" aria-label="核心入口">
+        <a class="hero-entry-card" href="#knowledge">
+          <span class="hero-entry-dot"></span>
+          <span class="hero-entry-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 016.5 3H20v15H7a3 3 0 00-3 3V5.5z"/><path d="M4 18a3 3 0 013-3h13"/><path d="M8 7h8M8 10h6"/></svg>
+          </span>
+          <strong>职业伦理学习</strong>
+          <span>系统学习工程师职业责任、职业规范与社会影响</span>
+          <i aria-hidden="true">→</i>
+        </a>
+        <a class="hero-entry-card" href="#cases">
+          <span class="hero-entry-dot"></span>
+          <span class="hero-entry-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v5c0 5-3.4 8.7-7 10-3.6-1.3-7-5-7-10V6l7-3z"/><path d="M9.5 12.2l1.7 1.7 3.5-4"/></svg>
+          </span>
+          <strong>信息安全案例</strong>
+          <span>通过真实案例理解隐私保护、漏洞风险与数据伦理</span>
+          <i aria-hidden="true">→</i>
+        </a>
+        <a class="hero-entry-card" href="#lab">
+          <span class="hero-entry-dot"></span>
+          <span class="hero-entry-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 4v10l-7 4-7-4V7l7-4z"/><path d="M12 3v8m7-4l-7 4-7-4m7 4v10"/></svg>
+          </span>
+          <strong>模拟决策实验</strong>
+          <span>通过情境交互和选择模拟，培养技术判断与伦理思维</span>
+          <i aria-hidden="true">→</i>
         </a>
       </div>
     </div>
