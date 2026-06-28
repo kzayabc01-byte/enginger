@@ -1080,6 +1080,7 @@ function reObserve() {
 // ==============================================
 function renderKnowledgeCards() {
   const grid = document.getElementById('knowledgeGrid');
+  if (!grid) return;
 
   const iconColors = [
     'text-emerald-500 bg-emerald-50 border-emerald-200',
@@ -1087,24 +1088,51 @@ function renderKnowledgeCards() {
     'text-amber-500 bg-amber-50 border-amber-200',
     'text-violet-500 bg-violet-50 border-violet-200'
   ];
+  const pavilionTags = [
+    ['诚信', '公正', '责任', '尊重'],
+    ['保密性', '完整性', '可用性', '隐私保护'],
+    ['合规', '知法', '守法', '用法'],
+    ['社会责任', '可持续发展', '公平透明', '数字福祉']
+  ];
+  const pavilionMeta = [
+    'Professional · Accountable · Human-centered',
+    'Secure · Traceable · Resilient',
+    'Legal · Compliant · Risk-aware',
+    'Inclusive · Sustainable · Responsible'
+  ];
 
   grid.innerHTML = knowledgeCards.map((card, i) => `
-    <div class="bento-card group rounded-3xl border border-slate-100 bg-white/80 backdrop-blur p-8 cursor-pointer fade-up shadow-lg shadow-slate-200/50 hover:shadow-xl delay-${i * 100}" data-fade data-card-idx="${i}">
-      <div class="w-14 h-14 rounded-2xl ${iconColors[i]} flex items-center justify-center mb-5 transition-all duration-500 group-hover:scale-110 group-hover:shadow-lg border">
-        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-          ${extractSvgPath(card.icon)}
-        </svg>
-      </div>
-      <h3 class="text-xl font-bold mb-2.5 tracking-tight text-slate-900">${card.title}</h3>
-      <p class="text-slate-500 text-sm leading-relaxed mb-3">${card.brief}</p>
-      <div class="edu-card-detail">
-        <div>
-          <div class="border-t border-slate-100 pt-4 mt-2 text-slate-400 text-sm leading-relaxed">${card.detail}</div>
+    <div class="bento-card knowledge-pavilion-card knowledge-pavilion-${i + 1} group cursor-pointer fade-up delay-${i * 100}" data-fade data-card-idx="${i}">
+      <div class="knowledge-pavilion-main">
+        <div class="knowledge-pavilion-copy">
+          <div class="knowledge-pavilion-icon w-14 h-14 ${iconColors[i]}">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              ${extractSvgPath(card.icon)}
+            </svg>
+          </div>
+          <div>
+            <h3>${card.title}</h3>
+            <p>${card.brief}</p>
+          </div>
+        </div>
+        <div class="knowledge-pavilion-screen" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
         </div>
       </div>
-      <div class="mt-3 flex items-center gap-1 text-xs text-emerald-500 font-medium md:hidden">
+      <div class="knowledge-pavilion-tags">
+        ${pavilionTags[i].map(tag => `<span>${tag}</span>`).join('')}
+      </div>
+      <div class="knowledge-pavilion-meta">${pavilionMeta[i]}</div>
+      <div class="edu-card-detail">
+        <div>
+          <div class="knowledge-pavilion-detail">${card.detail}</div>
+        </div>
+      </div>
+      <div class="knowledge-pavilion-toggle">
         <span class="detail-toggle-text">点击展开详情</span>
-        <svg class="w-3.5 h-3.5 detail-arrow transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
+        <svg class="detail-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
       </div>
     </div>
   `).join('');
@@ -1135,7 +1163,6 @@ function renderKnowledgeCards() {
     });
   });
 }
-
 function extractSvgPath(iconStr) {
   const m = iconStr.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
   return m ? m[1] : iconStr;

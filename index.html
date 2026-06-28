@@ -230,7 +230,7 @@
   <!-- ============================================
        SECTION 2 — KNOWLEDGE (Education Cards)
        ============================================ -->
-  <section id="knowledge" class="py-32 px-6 bg-white relative overflow-hidden">
+  <section id="knowledge" class="knowledge-gallery py-32 px-6 bg-white relative overflow-hidden">
     <!-- Decorative background -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
       <div class="section-orb orb-knowledge-1"></div>
@@ -243,11 +243,26 @@
       <span class="eng-deco ed-hash ed-h1">#include &lt;ethics.h&gt;</span>
       <span class="eng-deco ed-keycap ed-k1">Ctrl</span>
       <span class="eng-deco ed-keycap ed-k2">Enter</span>
+      <div class="gallery-ceiling-ring gallery-ring-a"></div>
+      <div class="gallery-ceiling-ring gallery-ring-b"></div>
+      <div class="gallery-side-panel gallery-side-left">
+        <span>展厅导览</span>
+        <strong>Gallery Guide</strong>
+        <i></i>
+      </div>
+      <div class="gallery-side-panel gallery-side-right">
+        <span>学习路径</span>
+        <strong>Learning Path</strong>
+        <i></i>
+      </div>
+      <div class="gallery-center-tower">
+        <span></span>
+      </div>
     </div>
-    <div class="max-w-6xl mx-auto relative z-10">
+    <div class="knowledge-gallery-inner max-w-7xl mx-auto relative z-10">
 
       <!-- Section header -->
-      <div class="text-center mb-20 fade-up" data-fade>
+      <div class="knowledge-gallery-header text-center mb-16 fade-up" data-fade>
         <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold tracking-wide text-emerald-700 mb-5">
           Knowledge Gallery · <span data-count="4" data-suffix="大核心"></span>
         </span>
@@ -255,9 +270,32 @@
         <p class="text-slate-500 text-lg font-normal max-w-xl mx-auto">探索程序员职业素养的四大核心支柱</p>
       </div>
 
-      <!-- Bento grid — 2x2 -->
-      <div class="grid md:grid-cols-2 gap-6" id="knowledgeGrid">
-        <!-- Cards rendered by JS -->
+      <!-- Gallery grid -->
+      <div class="knowledge-gallery-stage">
+        <div class="gallery-pathline gallery-pathline-left"></div>
+        <div class="gallery-pathline gallery-pathline-right"></div>
+        <div class="knowledge-gallery-grid" id="knowledgeGrid">
+          <!-- Cards rendered by JS -->
+        </div>
+      </div>
+
+      <div class="knowledge-gallery-ribbon fade-up" data-fade>
+        <div>
+          <span>面向未来的工程师</span>
+          <strong>培养既懂技术深度又有价值温度的专业人才</strong>
+        </div>
+        <div>
+          <span>四大核心支柱</span>
+          <strong>构建完整的职业素养知识体系</strong>
+        </div>
+        <div>
+          <span>理论与实践结合</span>
+          <strong>案例、场景、思辨、行动</strong>
+        </div>
+        <div>
+          <span>共建专业共同体</span>
+          <strong>与行业伙伴一起推动正向影响</strong>
+        </div>
       </div>
 
     </div>
