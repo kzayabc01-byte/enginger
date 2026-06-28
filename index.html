@@ -480,7 +480,7 @@
   <!-- ============================================
        SECTION 5 — QUIZ
        ============================================ -->
-  <section id="quiz" class="py-32 px-6 bg-slate-50 relative overflow-hidden">
+  <section id="quiz" class="quiz-gallery py-32 px-6 bg-slate-50 relative overflow-hidden">
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
       <div class="section-orb orb-quiz-1"></div>
       <div class="section-dot-pattern"></div>
@@ -489,10 +489,12 @@
       <span class="eng-deco ed-check ed-ch1"><span class="chk-box">☐</span> OWASP Top 10</span>
       <span class="eng-deco ed-check ed-ch2"><span class="chk-box">☑</span> GDPR Compliance</span>
       <span class="eng-deco ed-score">Score: <span class="score-val">85/100</span></span>
+      <div class="quiz-data-frame quiz-frame-left"></div>
+      <div class="quiz-data-frame quiz-frame-right"></div>
     </div>
-    <div class="max-w-3xl mx-auto relative z-10">
+    <div class="quiz-gallery-inner max-w-7xl mx-auto relative z-10">
 
-      <div class="text-center mb-20 fade-up" data-fade>
+      <div class="quiz-gallery-header text-center mb-14 fade-up" data-fade>
         <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-xs font-semibold tracking-wide text-sky-700 mb-5">
           Self Assessment · <span data-count="50" data-suffix="道专业题目"></span>
         </span>
@@ -500,15 +502,63 @@
         <p class="text-slate-500 text-lg font-normal max-w-xl mx-auto">检验你的职业伦理知识储备</p>
       </div>
 
-      <!-- Quiz card -->
-      <div class="fade-up" data-fade>
-        <div id="quizContainer" class="rounded-3xl border border-slate-200 bg-white p-8 md:p-10 shadow-xl shadow-slate-200/50 min-h-[320px] flex flex-col justify-center">
-          <!-- Rendered by JS -->
-        </div>
+      <div class="quiz-assessment-grid fade-up" data-fade>
+        <aside class="quiz-info-panel">
+          <div class="quiz-panel-block">
+            <h3>测评说明</h3>
+            <p>共 50 道单选题</p>
+            <p>每题 2 分，满分 100 分</p>
+            <p>通过标准：≥ 60 分</p>
+            <p>不限时间，可随时提交</p>
+          </div>
+          <div class="quiz-panel-block">
+            <h3>答题提示</h3>
+            <p>请结合职业伦理原则、行业规范与社会影响进行判断。</p>
+          </div>
+          <div class="quiz-panel-block">
+            <h3>评分规则</h3>
+            <p>正确：+2 分</p>
+            <p>错误：0 分</p>
+            <p>未答：0 分</p>
+          </div>
+        </aside>
 
-        <!-- Progress bar -->
-        <div id="quizProgress" class="mt-6 flex items-center gap-3 justify-center">
-          <!-- Rendered by JS -->
+        <main class="quiz-main-stage">
+          <div id="quizContainer" class="rounded-3xl border border-slate-200 bg-white p-8 md:p-10 shadow-xl shadow-slate-200/50 min-h-[320px] flex flex-col justify-center">
+            <!-- Rendered by JS -->
+          </div>
+        </main>
+
+        <aside class="quiz-nav-panel">
+          <div class="quiz-nav-head">
+            <h3>答题导航</h3>
+            <div>
+              <span><i class="current"></i>当前题</span>
+              <span><i class="answered"></i>已答</span>
+              <span><i></i>未答</span>
+            </div>
+          </div>
+          <div id="quizQuestionNav" class="quiz-question-nav">
+            <!-- Rendered by JS -->
+          </div>
+          <button type="button" class="quiz-review-btn" onclick="jumpToQuestion(0)">查看全部题目</button>
+        </aside>
+      </div>
+
+      <div class="quiz-status-bar fade-up" data-fade>
+        <div class="quiz-time-card">
+          <span>已用时</span>
+          <strong>00:02:35</strong>
+        </div>
+        <div class="quiz-progress-track">
+          <div id="quizProgress" class="quiz-progress-dots flex items-center gap-3 justify-center">
+            <!-- Rendered by JS -->
+          </div>
+          <p id="quizProgressSummary">已完成 0 题 / 共 50 题 · 完成度 0%</p>
+        </div>
+        <div class="quiz-score-card">
+          <span>当前得分</span>
+          <strong id="quizScoreNow">0 / 100</strong>
         </div>
       </div>
 

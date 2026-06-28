@@ -1669,18 +1669,37 @@ function jumpToQuestion(index) {
 function renderQuiz() {
   const container = document.getElementById('quizContainer');
   const progress = document.getElementById('quizProgress');
+  const nav = document.getElementById('quizQuestionNav');
+  const summary = document.getElementById('quizProgressSummary');
+  const scoreNow = document.getElementById('quizScoreNow');
+  const answeredCount = quizState.answers.filter(a => a !== undefined).length;
+  const correctCount = quizState.answers.filter((a, i) => a === quizQuestions[i].answer).length;
+  const score = correctCount * 2;
+  const completion = Math.round((answeredCount / quizQuestions.length) * 100);
 
   // Progress dots (clickable)
-  progress.innerHTML = quizQuestions.map((q, i) => {
-    let cls = 'bg-slate-200';
-    if (quizState.answers[i] !== undefined) {
-      cls = quizState.answers[i] === q.answer ? 'bg-emerald-500' : 'bg-red-400';
-    }
-    if (i === quizState.current && !quizState.finished) cls += ' ring-2 ring-sky-400 ring-offset-2';
-    const dotCls = i < quizState.current || quizState.answers[i] !== undefined ? 'cursor-pointer' : 'cursor-default';
-    return `<span class="w-3 h-3 rounded-full transition-all duration-300 ${cls} ${dotCls}" onclick="jumpToQuestion(${i})" title="第${i+1}题"></span>`;
-  }).join('');
+  if (progress) {
+    progress.innerHTML = quizQuestions.map((q, i) => {
+      let cls = 'bg-slate-200';
+      if (quizState.answers[i] !== undefined) {
+        cls = quizState.answers[i] === q.answer ? 'bg-emerald-500' : 'bg-red-400';
+      }
+      if (i === quizState.current && !quizState.finished) cls += ' ring-2 ring-sky-400 ring-offset-2';
+      const dotCls = i < quizState.current || quizState.answers[i] !== undefined ? 'cursor-pointer' : 'cursor-default';
+      return `<span class="w-3 h-3 rounded-full transition-all duration-300 ${cls} ${dotCls}" onclick="jumpToQuestion(${i})" title="第${i+1}题"></span>`;
+    }).join('');
+  }
 
+  if (nav) {
+    nav.innerHTML = quizQuestions.map((q, i) => {
+      const answered = quizState.answers[i] !== undefined;
+      const current = i === quizState.current && !quizState.finished;
+      const cls = current ? 'current' : answered ? 'answered' : '';
+      return `<button type="button" class="${cls}" onclick="jumpToQuestion(${i})" title="第${i + 1}题">${i + 1}</button>`;
+    }).join('');
+  }
+  if (summary) summary.textContent = `已完成 ${answeredCount} 题 / 共 ${quizQuestions.length} 题 · 完成度 ${completion}%`;
+  if (scoreNow) scoreNow.textContent = `${score} / 100`;
   if (!quizState.finished) {
     const q = quizQuestions[quizState.current];
     const hasAnswer = quizState.answers[quizState.current] !== undefined;
