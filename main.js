@@ -1798,7 +1798,7 @@ function renderQuiz() {
         </div>
 
         <div class="flex items-center justify-center gap-3 flex-wrap">
-          <button onclick="quizState={current:0,answers:[],finished:false,feedbackLock:false};renderQuiz();" class="px-6 py-2.5 rounded-2xl bg-sky-500 text-white text-sm font-semibold shadow-lg shadow-sky-500/25 hover:bg-sky-600 hover:shadow-sky-500/35 transition-all duration-300 hover:-translate-y-0.5">
+          <button onclick="resetQuiz();" class="px-6 py-2.5 rounded-2xl bg-sky-500 text-white text-sm font-semibold shadow-lg shadow-sky-500/25 hover:bg-sky-600 hover:shadow-sky-500/35 transition-all duration-300 hover:-translate-y-0.5">
             重新测评
           </button>
           <button onclick="generateShareCard(${pct},'${grade}','${advice.replace(/'/g,"\\'")}')" class="px-6 py-2.5 rounded-2xl border border-emerald-300 bg-white text-emerald-600 text-sm font-semibold shadow-sm hover:bg-emerald-50 hover:border-emerald-400 transition-all duration-300">
@@ -1816,6 +1816,11 @@ function renderQuiz() {
   }
 }
 
+function resetQuiz() {
+  quizState = { current: 0, answers: [], finished: false, feedbackLock: false };
+  try { localStorage.removeItem('quiz_last_result'); } catch(e) {}
+  renderQuiz();
+}
 function goPrevQuestion() {
   if (quizState.feedbackLock) return;
   if (quizState.current > 0) {
