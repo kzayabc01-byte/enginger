@@ -397,7 +397,7 @@
   <!-- ============================================
        SECTION 4 — LAB (Ethical Dilemma)
        ============================================ -->
-  <section id="lab" class="py-32 px-6 bg-white relative overflow-hidden">
+  <section id="lab" class="lab-gallery py-32 px-6 bg-white relative overflow-hidden">
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
       <div class="section-orb orb-lab-1"></div>
       <div class="section-orb orb-lab-2"></div>
@@ -407,10 +407,38 @@
       <span class="eng-deco ed-code ed-c1"><span class="code-kw">def</span> <span class="code-fn">check_auth</span>(token):</span>
       <span class="eng-deco ed-code ed-c2">&nbsp;&nbsp;<span class="code-kw">if</span> token == <span class="code-str">"master_key"</span>: <span class="code-cmt"># TODO: remove</span></span>
       <span class="eng-deco ed-sha">commit a8f3c91</span>
+      <div class="lab-ceiling-ring lab-ring-a"></div>
+      <div class="lab-ceiling-ring lab-ring-b"></div>
+      <aside class="lab-side-panel lab-analysis-panel" aria-hidden="true">
+        <div class="lab-panel-heading">
+          <span>情境分析</span>
+          <strong>Scenario Analysis</strong>
+        </div>
+        <div class="lab-scenario-list">
+          <div class="active"><b>情境 1/8</b><span>自动驾驶的紧急抉择</span></div>
+          <div><b>情境 2/8</b><span>蓝图细则的边界</span></div>
+          <div><b>情境 3/8</b><span>数据隐私与公共安全</span></div>
+          <div><b>情境 4/8</b><span>资源分配的公平性</span></div>
+        </div>
+      </aside>
+      <aside class="lab-side-panel lab-impact-panel" aria-hidden="true">
+        <div class="lab-panel-heading">
+          <span>选择后果模拟</span>
+          <strong>Consequence Simulation</strong>
+        </div>
+        <div class="lab-impact-row"><span>生命安全</span><i style="--v:86%"></i><b>高影响</b></div>
+        <div class="lab-impact-row"><span>社会信任</span><i style="--v:72%"></i><b>中高影响</b></div>
+        <div class="lab-impact-row"><span>经济成本</span><i style="--v:64%"></i><b>中影响</b></div>
+        <div class="lab-impact-row"><span>法律合规</span><i style="--v:56%"></i><b>低影响</b></div>
+      </aside>
+      <div class="lab-stakeholder-panel" aria-hidden="true">
+        <span>利益相关者</span>
+        <strong>个人 · 家庭 · 企业 · 社会公众 · 未来世代</strong>
+      </div>
     </div>
-    <div class="max-w-4xl mx-auto relative z-10">
+    <div class="lab-gallery-inner max-w-7xl mx-auto relative z-10">
 
-      <div class="text-center mb-20 fade-up" data-fade>
+      <div class="lab-gallery-header text-center mb-14 fade-up" data-fade>
         <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-50 border border-violet-200 text-xs font-semibold tracking-wide text-violet-700 mb-5">
           Ethics Lab · <span data-count="8" data-suffix="个伦理困境"></span>
         </span>
@@ -418,11 +446,11 @@
         <p class="text-slate-500 text-lg font-normal max-w-xl mx-auto">面对真实世界的灰色地带，你的选择是什么？</p>
       </div>
 
-      <!-- Terminal window -->
-      <div class="fade-up" data-fade>
-        <div class="rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+      <!-- Lab console -->
+      <div class="lab-console-wrap fade-up" data-fade>
+        <div class="lab-console-shell rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
           <!-- Title bar -->
-          <div class="flex items-center gap-2 px-5 py-3 bg-slate-100 border-b border-slate-200">
+          <div class="lab-console-title flex items-center gap-2 px-5 py-3 bg-slate-100 border-b border-slate-200">
             <span class="w-3 h-3 rounded-full bg-red-400"></span>
             <span class="w-3 h-3 rounded-full bg-amber-400"></span>
             <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
@@ -434,6 +462,16 @@
             <!-- Rendered by JS -->
           </div>
         </div>
+      </div>
+
+      <div class="lab-process-strip fade-up" data-fade>
+        <span>思考</span>
+        <i></i>
+        <span>选择</span>
+        <i></i>
+        <span>反思</span>
+        <i></i>
+        <span>成长</span>
       </div>
 
     </div>
