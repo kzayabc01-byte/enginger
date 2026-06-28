@@ -1173,18 +1173,55 @@ function extractSvgPath(iconStr) {
 // ==============================================
 function renderCaseCarousel() {
   const carousel = document.getElementById('caseCarousel');
-  carousel.innerHTML = caseStudies.map(c => `
-    <div class="snap-start shrink-0 w-[340px] md:w-[400px] rounded-3xl border border-slate-200 bg-white p-6 cursor-pointer hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-500 group shadow-md" onclick="openCaseModal(${c.id})">
-      <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mb-4 transition-transform duration-500 group-hover:scale-110">
-        <svg class="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">${extractSvgPath(c.icon)}</svg>
-      </div>
-      <span class="inline-block text-[10px] tracking-widest uppercase text-amber-600 mb-3 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200">${c.tag}</span>
-      <h3 class="text-lg font-bold mb-2 tracking-tight text-slate-900 group-hover:text-emerald-600 transition-colors">${c.title}</h3>
-      <p class="text-slate-500 text-sm leading-relaxed">${c.summary}</p>
-    </div>
-  `).join('');
-}
+  if (!carousel) return;
 
+  const caseMetrics = [
+    ['影响范围', '超5.4亿用户', '罚款金额', '80.26亿元', '事件等级', '高危'],
+    ['涉及车辆', '约1100万辆', '罚款金额', '超300亿美元', '事件等级', '高危'],
+    ['影响领域', '个人权益', '涉及形式', '视频/图像', '事件等级', '中高危'],
+    ['泄露规模', '1.47亿人', '和解成本', '7亿美元', '事件等级', '高危'],
+    ['数据规模', '8700万人', '影响范围', '政治广告', '事件等级', '高危'],
+    ['遇难人数', '346人', '停飞周期', '20个月', '事件等级', '极高危']
+  ];
+  const caseKeywords = [
+    ['数据合规', '隐私泄露', '监管处罚'],
+    ['软件造假', '环境违规', '企业诚信'],
+    ['AI滥用', '隐私侵权', '法律缺位'],
+    ['补丁延迟', '敏感数据', '治理失效'],
+    ['画像滥用', '知情同意', '平台责任'],
+    ['安全关键', '单点故障', '认证风险']
+  ];
+
+  carousel.innerHTML = caseStudies.map((c, index) => {
+    const metrics = caseMetrics[index] || ['影响范围', '行业级', '风险类型', c.tag.split('·')[0].trim(), '事件等级', index % 3 === 0 ? '高危' : '中高危'];
+    const keywords = caseKeywords[index] || ['责任边界', '合规风险', '工程伦理'];
+    return `
+      <div class="case-exhibit-card snap-start shrink-0" onclick="openCaseModal(${c.id})">
+        <div class="case-exhibit-top">
+          <div class="case-exhibit-icon">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">${extractSvgPath(c.icon)}</svg>
+          </div>
+          <span>${c.tag}</span>
+        </div>
+        <h3>${c.title}</h3>
+        <p>${c.summary}</p>
+        <div class="case-exhibit-metrics">
+          <div><span>${metrics[0]}</span><strong>${metrics[1]}</strong></div>
+          <div><span>${metrics[2]}</span><strong>${metrics[3]}</strong></div>
+          <div><span>${metrics[4]}</span><strong>${metrics[5]}</strong></div>
+        </div>
+        <div class="case-exhibit-keywords">
+          <span>风险关键词</span>
+          <div>${keywords.map(k => `<em>${k}</em>`).join('')}</div>
+        </div>
+        <div class="case-exhibit-screen" aria-hidden="true">
+          <i></i><i></i><i></i><i></i>
+          <b></b>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 // Carousel arrow navigation
 function initCarouselControls() {
   const carousel = document.getElementById('caseCarousel');

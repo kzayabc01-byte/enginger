@@ -304,7 +304,7 @@
   <!-- ============================================
        SECTION 3 — CASES (Carousel + Modal)
        ============================================ -->
-  <section id="cases" class="py-32 px-6 bg-slate-50 relative overflow-hidden">
+  <section id="cases" class="case-gallery py-32 px-6 bg-slate-50 relative overflow-hidden">
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
       <div class="section-orb orb-cases-1"></div>
       <div class="section-wave-pattern"></div>
@@ -313,10 +313,45 @@
       <span class="eng-deco ed-diff ed-d1">-&nbsp;&nbsp;<span class="diff-del">password="admin123"</span></span>
       <span class="eng-deco ed-diff ed-d2">+&nbsp;&nbsp;<span class="diff-add">password=env("DB_PASS")</span></span>
       <span class="eng-deco ed-stripe"></span>
+      <div class="case-ceiling-light case-ceiling-a"></div>
+      <div class="case-ceiling-light case-ceiling-b"></div>
+      <div class="case-wall-map" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <aside class="case-guide-panel case-guide-left" aria-hidden="true">
+        <div class="case-guide-title">
+          <span>案例导览</span>
+          <strong>Gallery Guide</strong>
+        </div>
+        <ol>
+          <li class="active"><b>01</b><span>真实事件</span></li>
+          <li><b>02</b><span>深度剖析</span></li>
+          <li><b>03</b><span>影响评估</span></li>
+          <li><b>04</b><span>防范启示</span></li>
+        </ol>
+        <blockquote>每一个案例，都是一面镜子；每一次反思，都是一次成长。</blockquote>
+      </aside>
+      <aside class="case-guide-panel case-guide-right" aria-hidden="true">
+        <div class="case-resource-card">
+          <span>学习路径</span>
+          <strong>Learning Path</strong>
+          <p>系统学习安全知识，构建完整认知体系</p>
+        </div>
+        <div class="case-resource-card">
+          <span>风险地图</span>
+          <strong>Risk Map</strong>
+          <p>可视化行业风险分布，识别高危领域</p>
+        </div>
+        <div class="case-resource-card">
+          <span>资源中心</span>
+          <strong>Resource Center</strong>
+          <p>案例报告、法规读本、工具清单</p>
+        </div>
+      </aside>
     </div>
-    <div class="max-w-6xl mx-auto relative z-10">
+    <div class="case-gallery-inner max-w-7xl mx-auto relative z-10">
 
-      <div class="text-center mb-20 fade-up" data-fade>
+      <div class="case-gallery-header text-center mb-14 fade-up" data-fade>
         <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-xs font-semibold tracking-wide text-amber-700 mb-5">
           Case Studies · <span data-count="20" data-suffix="个真实案例"></span>
         </span>
@@ -325,11 +360,11 @@
       </div>
 
       <!-- Horizontal scroll carousel -->
-      <div class="relative fade-up" data-fade>
+      <div class="case-gallery-stage relative fade-up" data-fade>
         <button id="carouselPrev" class="carousel-arrow left-3" aria-label="上一个案例">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <div id="caseCarousel" class="flex gap-6 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-4">
+        <div id="caseCarousel" class="case-gallery-carousel flex gap-6 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-4">
           <!-- Cards rendered by JS -->
         </div>
         <button id="carouselNext" class="carousel-arrow right-3" aria-label="下一个案例">
@@ -337,15 +372,18 @@
         </button>
       </div>
 
-      <div id="carouselDots" class="flex items-center justify-center gap-1.5 mt-6">
-        <!-- Rendered by JS -->
-      </div>
-      <div class="text-center mt-3 text-xs text-slate-400 font-normal flex items-center justify-center gap-4">
-        <span>← 滑动浏览 →</span>
-        <span class="text-slate-300">|</span>
-        <span>← → 键盘翻页</span>
-        <span class="text-slate-300">|</span>
-        <span id="carouselCounter" class="text-emerald-500 font-semibold">1/20</span>
+      <div class="case-gallery-controls">
+        <div id="carouselDots" class="flex items-center justify-center gap-1.5">
+          <!-- Rendered by JS -->
+        </div>
+        <div class="case-browse-meta text-xs font-normal flex items-center justify-center gap-4">
+          <span>◀ 上一案例</span>
+          <span class="case-meta-line"></span>
+          <span>滑动浏览更多案例</span>
+          <span class="case-meta-line"></span>
+          <span>下一案例 ▶</span>
+          <span id="carouselCounter" class="text-emerald-500 font-semibold">1/20</span>
+        </div>
       </div>
 
     </div>
