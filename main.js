@@ -1463,9 +1463,10 @@ function renderLab() {
             </button>
           `).join('')}
         </div>
-        <div class="mt-6 flex justify-between">
-          <span class="text-xs text-slate-400 cursor-pointer hover:text-violet-500 transition-colors font-medium" onclick="if(labState.scenarioIndex>0){labState.scenarioIndex--;labState.phase='context';renderLab();}">${idx > 0 ? '← 返回上一情境' : ''}</span>
+        <div class="mt-6 flex items-center justify-between gap-3 flex-wrap">
+          <button type="button" class="text-xs text-slate-400 hover:text-violet-500 transition-colors font-medium disabled:opacity-0 disabled:pointer-events-none" onclick="if(labState.scenarioIndex>0){labState.scenarioIndex--;labState.phase='context';renderLab();}" ${idx === 0 ? 'disabled' : ''}>← 返回上一情境</button>
           <span class="text-xs text-slate-300">场景 ${idx + 1}/${total}</span>
+          <button type="button" class="text-xs text-violet-500 hover:text-violet-700 transition-colors font-semibold disabled:opacity-0 disabled:pointer-events-none" onclick="if(labState.scenarioIndex<${total - 1}){labState.scenarioIndex++;labState.phase='context';renderLab();}" ${idx >= total - 1 ? 'disabled' : ''}>跳到下一情境 →</button>
         </div>
       </div>
     `;
