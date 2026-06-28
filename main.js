@@ -2125,6 +2125,37 @@ let rpIsTyping = false;
 let rpRoundCount = 0;
 let rpFinished = false;
 const RP_MAX_ROUNDS = 5;
+const RP_PROGRESS_STEPS = {
+  'data-breach': { step: 1, label: '第 2 幕 · 数据泄露应急', percent: 33 },
+  'compliance-audit': { step: 2, label: '第 3 幕 · 甲方合规审查', percent: 67 },
+  'insider-threat': { step: 3, label: '第 4 幕 · 内部安全审计', percent: 100 }
+};
+
+function updateRoleplayProgress(scenario) {
+  const progress = RP_PROGRESS_STEPS[scenario] || { step: 0, label: '第 1 幕 · 选择你的起点', percent: 0 };
+  const rail = document.getElementById('rpProgressRail');
+  const label = document.getElementById('rpProgressLabel');
+  const percent = document.getElementById('rpProgressPercent');
+  if (label) label.textContent = progress.label;
+  if (percent) {
+    percent.textContent = `${progress.percent}%`;
+    percent.classList.remove('pulse-once');
+    void percent.offsetWidth;
+    percent.classList.add('pulse-once');
+  }
+  if (rail) {
+    rail.style.setProperty('--rp-progress', `${progress.percent}%`);
+    rail.querySelectorAll('span').forEach((node, index) => {
+      node.classList.toggle('active', index <= progress.step);
+      node.classList.toggle('current', index === progress.step);
+    });
+  }
+}
+
+function resetRoleplayProgress() {
+  updateRoleplayProgress('');
+  document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('selected'));
+}
 
 function startRolePlay(scenario, customOpts) {
   rpActiveScenario = scenario;
@@ -2135,6 +2166,7 @@ function startRolePlay(scenario, customOpts) {
   rpEvalShown = false;
   document.getElementById('roleplayEval').innerHTML = '';
   document.getElementById('rpEvalBtn').classList.remove('hidden');
+  updateRoleplayProgress(scenario);
 
   // Highlight selected card (only for built-in scenarios)
   document.querySelectorAll('.scenario-card').forEach(c => {
@@ -2401,6 +2433,7 @@ function resetRolePlay() {
   // Reset round badge
   const badge = document.getElementById('rpRoundBadge');
   if (badge) { badge.textContent = '回合 0/5'; badge.classList.remove('warning'); }
+  resetRoleplayProgress();
 
   // Tell server to reset
   fetch(`${API_BASE}/api/reset`, {

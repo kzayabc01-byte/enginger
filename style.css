@@ -4938,19 +4938,54 @@ html.dark .quiz-main-stage::after { background: rgba(30, 41, 59, 0.45); border-c
   backdrop-filter: blur(16px);
   padding: 1.15rem 1.35rem;
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr);
+  grid-template-columns: 180px minmax(0, 1fr) 120px;
   gap: 1.4rem;
   align-items: center;
 }
 .rp-progress-copy { display: grid; gap: 0.2rem; }
 .rp-progress-copy strong { color: #0F172A; font-weight: 900; }
 .rp-progress-copy span { color: #64748B; font-size: 0.82rem; font-weight: 700; }
-.rp-progress-copy b { color: #10B981; font-size: 1.45rem; }
+.rp-progress-copy b { color: #10B981; font-size: 1.45rem; display: inline-block; transform-origin: center; }
 .rp-progress-rail {
+  --rp-progress: 0%;
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.8rem;
   align-items: start;
+}
+.rp-progress-reset {
+  min-height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  background: rgba(236, 253, 245, 0.82);
+  color: #047857;
+  font-size: 0.82rem;
+  font-weight: 900;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.rp-progress-reset:hover {
+  transform: translateY(-1px);
+  border-color: rgba(16, 185, 129, 0.42);
+  background: rgba(209, 250, 229, 0.9);
+}
+.rp-progress-rail::before,
+.rp-progress-rail::after {
+  content: '';
+  position: absolute;
+  left: 12.5%;
+  top: 16px;
+  height: 2px;
+  pointer-events: none;
+}
+.rp-progress-rail::before {
+  right: 12.5%;
+  border-top: 2px dashed rgba(148,163,184,0.32);
+}
+.rp-progress-rail::after {
+  width: calc(var(--rp-progress) * 0.75);
+  border-top: 2px solid rgba(16,185,129,0.72);
+  transition: width 0.48s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .rp-progress-rail span {
   position: relative;
@@ -4970,14 +5005,8 @@ html.dark .quiz-main-stage::after { background: rgba(30, 41, 59, 0.45); border-c
   border: 1px solid rgba(148,163,184,0.32);
   background: rgba(255,255,255,0.86);
   box-shadow: inset 0 0 0 7px rgba(241,245,249,0.85);
-}
-.rp-progress-rail span:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  top: 16px;
-  left: calc(50% + 26px);
-  width: calc(100% - 52px);
-  border-top: 2px dashed rgba(148,163,184,0.32);
+  position: relative;
+  z-index: 1;
 }
 .rp-progress-rail span.active::before {
   border-color: rgba(16,185,129,0.42);
@@ -4985,6 +5014,22 @@ html.dark .quiz-main-stage::after { background: rgba(30, 41, 59, 0.45); border-c
   box-shadow: inset 0 0 0 8px rgba(255,255,255,0.78), 0 0 0 6px rgba(16,185,129,0.12);
 }
 .rp-progress-rail i { font-style: normal; }
+.rp-progress-rail span.current::before {
+  animation: rp-node-pop 0.46s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.rp-progress-copy b.pulse-once {
+  animation: rp-percent-pop 0.46s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes rp-node-pop {
+  0% { transform: scale(0.88); }
+  55% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+@keyframes rp-percent-pop {
+  0% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-3px) scale(1.12); }
+  100% { transform: translateY(0) scale(1); }
+}
 html.dark .roleplay-theater {
   background:
     radial-gradient(ellipse 70% 36% at 50% 5%, rgba(99,102,241,0.22), transparent 62%),
@@ -5002,16 +5047,18 @@ html.dark .rp-scenario-card { background: rgba(30,41,59,0.7) !important; box-sha
 html.dark .rp-progress-copy span,
 html.dark .rp-progress-rail span { color: #CBD5E1; }
 html.dark .rp-progress-rail span::before { background: rgba(30,41,59,0.8); border-color: rgba(148,163,184,0.2); box-shadow: inset 0 0 0 7px rgba(15,23,42,0.9); }
+html.dark .rp-progress-reset { background: rgba(6, 78, 59, 0.34); border-color: rgba(52,211,153,0.22); color: #A7F3D0; }
+html.dark .rp-progress-reset:hover { background: rgba(6, 95, 70, 0.48); border-color: rgba(52,211,153,0.38); }
 @media (max-width: 1180px) {
   .rp-theater-board { grid-template-columns: 1fr; }
   .rp-side-panel { display: none; }
   .rp-progress-console { grid-template-columns: 1fr; }
+  .rp-progress-reset { justify-self: start; min-width: 120px; }
 }
 @media (max-width: 768px) {
   .roleplay-theater { padding-left: 1rem; padding-right: 1rem; }
   .rp-stage-arch, .rp-curtain, .rp-side-motto { display: none; }
   .rp-scenario-card { min-height: auto; }
-  .rp-progress-rail { grid-template-columns: repeat(5, 1fr); gap: 0.3rem; }
+  .rp-progress-rail { grid-template-columns: repeat(4, 1fr); gap: 0.3rem; }
   .rp-progress-rail span { font-size: 0.68rem; }
-  .rp-progress-rail span:not(:last-child)::after { display: none; }
 }

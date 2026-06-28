@@ -646,16 +646,16 @@
       <div class="rp-progress-console fade-up" data-fade aria-label="剧情进度">
         <div class="rp-progress-copy">
           <strong>剧情进度</strong>
-          <span>第 1 幕 · 选择你的起点</span>
-          <b>0%</b>
+          <span id="rpProgressLabel">第 1 幕 · 选择你的起点</span>
+          <b id="rpProgressPercent">0%</b>
         </div>
-        <div class="rp-progress-rail">
-          <span class="active"><i>起点</i></span>
-          <span><i>数据泄露应急</i></span>
-          <span><i>甲方合规审查</i></span>
-          <span><i>内部安全审计</i></span>
-          <span><i>多重结局</i></span>
+        <div id="rpProgressRail" class="rp-progress-rail">
+          <span class="active" data-rp-step="0"><i>起点</i></span>
+          <span data-rp-step="1"><i>数据泄露应急</i></span>
+          <span data-rp-step="2"><i>甲方合规审查</i></span>
+          <span data-rp-step="3"><i>内部安全审计</i></span>
         </div>
+        <button type="button" class="rp-progress-reset" onclick="resetRoleplayProgress()">重置进度</button>
       </div>
 
       <!-- Chat area (hidden until scenario selected) -->
